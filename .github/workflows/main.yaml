@@ -26,4 +26,7 @@ jobs:
       run: |
         result=`pylint users/app/api/app.py | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p'`
         echo "Result : $result"
-        if [ $result < 8 ]; then exit 1; fi
+        if [ $result < 8 ]; then 
+          echo "Game over!"
+          exit 1
+        fi
