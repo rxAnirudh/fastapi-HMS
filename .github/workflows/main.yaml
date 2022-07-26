@@ -25,4 +25,4 @@ jobs:
     - name: Lint with pylint
       run: |
         result=`pylint users/app/api/app.py | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p'`
-      if: ${{ result <=  8 }}
+      if: ${{ $result <=  8 }}
