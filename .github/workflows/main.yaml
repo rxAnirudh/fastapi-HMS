@@ -24,5 +24,6 @@ jobs:
         if [ -f */requirements.txt ]; then pip install -r */requirements.txt; fi
     - name: Lint with pylint
       run: |
-        echo "result=$(pylint users/app/api/app.py | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p')" >> $GITHUB_ENV
-        if [ env.result < 8 ]; then exit 1; fi
+        result=`pylint users/app/api/app.py | sed -n 's/^Your code has been rated at \([-0-9.]*\)\/.*/\1/p'`
+        echo result
+        if [ result < 8 ]; then exit 1; fi
