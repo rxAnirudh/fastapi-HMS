@@ -1,9 +1,11 @@
 """File for hospital route"""
 from fastapi import Depends,  HTTPException, APIRouter
 from sqlalchemy.orm import Session
-from api.hospital import  controller, schemas
+from app.models.schemas import  schemas
 from db.database import get_db
 from typing import List
+
+from hospital.app.api import controller
 
 hospital_router = APIRouter()
 
@@ -29,6 +31,7 @@ def delete_hospital(hospitalid: schemas.HospitalId, database: Session = Depends(
     """Function to return hospital details
     (specific and all hospitals data can be fetched)"""
     return controller.delete_hospital(database, id = hospitalid.id)
+
 
 @hospital_router.post("/update_hospital")
 def update_hospital(hospital_details: schemas.HospitalCreate, database: Session = Depends(get_db)):
