@@ -2,14 +2,13 @@
 from fastapi import FastAPI
 import uvicorn
 from db import Base,engine
-from api import hospital_route
+from api import doctor_route
 
 Base.metadata.create_all(engine)
 
 app = FastAPI()
 
-app.include_router(router=hospital_route.hospital_router,prefix="/hospital")
+app.include_router(router=doctor_route.doctor_router,prefix="/doctor")
 
 if __name__ == "__main__":
-    print("called")
     uvicorn.run(app)

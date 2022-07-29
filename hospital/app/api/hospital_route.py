@@ -1,11 +1,11 @@
 """File for hospital route"""
 from fastapi import Depends,  HTTPException, APIRouter
 from sqlalchemy.orm import Session
-from app.models.schemas import  schemas
-from db.database import get_db
+from models import schemas
+from db import get_db
 from typing import List
 
-from hospital.app.api import controller
+from api import controller
 
 hospital_router = APIRouter()
 

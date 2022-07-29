@@ -1,7 +1,7 @@
 """Controller file for writing db queries"""
 from typing import Optional
 from sqlalchemy.orm import Session
-from api.hospital import models,schemas
+from models import models,schemas
 from response import Response as ResponseData
 
 

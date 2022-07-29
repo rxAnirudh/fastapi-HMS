@@ -3,8 +3,7 @@
 from datetime import datetime
 from operator import index
 from sqlalchemy import Column, TIMESTAMP, ForeignKey, Integer,  String
-from db.database import Base
-from phonenumber_field.modelfields import PhoneNumberField
+from db import Base
 
 
 class Hospital(Base):
