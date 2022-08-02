@@ -10,5 +10,7 @@ app = FastAPI()
 
 app.include_router(router=doctor_route.doctor_router,prefix="/doctor")
 
+
+
 if __name__ == "__main__":
     uvicorn.run(app)

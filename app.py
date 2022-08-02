@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from db.database import SessionLocal, engine,Base
+from app.db.database import SessionLocal, engine,Base
 
 """
 Create all table defined in models.py

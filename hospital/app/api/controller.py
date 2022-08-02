@@ -1,7 +1,9 @@
 """Controller file for writing db queries"""
+import sys
+sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 from typing import Optional
 from sqlalchemy.orm import Session
-from models import models,schemas
+from hospital.app.models import models,schemas
 from response import Response as ResponseData
 
 
@@ -30,6 +32,13 @@ def create_hospital(database: Session, hospital: schemas.HospitalBase):
 def get_hospital(database: Session, contact_number : str):
     """Function to tell user if hospital with given contact number already exists or not"""
     return database.query(models.HospitalDetails).filter(models.HospitalDetails.contact_number == contact_number).first()
+
+def check_if_hospital_id_is_valid(database: Session, id : Optional[int] = None):
+    hospital_data = database.query(models.Hospital).filter(models.Hospital.id == id).first()
+    if hospital_data:
+        return True
+    else:
+        return False
 
 def get_hospital_by_id(database: Session, id : Optional[int] = None):
     """Function to tell user if hospital with given contact number already exists or not"""
