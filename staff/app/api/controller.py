@@ -6,7 +6,7 @@ sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-managem
 from typing import Optional
 import sys
 from sqlalchemy.orm import Session
-from models import models,schemas
+from staff.app.models import models,schemas
 from response import Response as ResponseData
 from hospital.app.api.controller import check_if_hospital_id_is_valid
 
@@ -16,6 +16,12 @@ def Merge(dict1, dict2):
     """Function to merge dict using update method"""
     return dict2.update(dict1)
 
+def check_if_staff_id_is_valid(database: Session, id : Optional[int] = None):
+    staff_data = database.query(models.Staff).filter(models.Staff.id == id).first()
+    if staff_data:
+        return True
+    else:
+        return False
 
 def add_new_staff(database: Session, staff: schemas.StaffBase):
     """Function to return query based data while creating new staff creation api"""
