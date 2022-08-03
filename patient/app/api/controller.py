@@ -6,7 +6,7 @@ sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-managem
 from typing import Optional
 import sys
 from sqlalchemy.orm import Session
-from models import models,schemas
+from patient.app.models import models,schemas
 from response import Response as ResponseData
 from hospital.app.api.controller import check_if_hospital_id_is_valid
 
@@ -63,6 +63,13 @@ def delete_patient_details(database: Session, id : Optional[int] = None):
     database.query(models.Patient).filter_by(id = id).delete()
     database.commit()
     return ResponseData.success([],"Patient details deleted successfully")
+
+def check_if_patient_id_is_valid(database: Session, id : Optional[int] = None):
+    hospital_data = database.query(models.Patient).filter(models.Patient.id == id).first()
+    if hospital_data:
+        return True
+    else:
+        return False
 
 def update_patient_details(database: Session, patient: schemas.AddNewPatient):
     """Function to return query based data while creating add_new_staff creation api"""
