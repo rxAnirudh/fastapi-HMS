@@ -47,6 +47,11 @@ def get_patient(database: Session, contact_number : str):
 
 def get_patient_by_id(database: Session, id : Optional[int] = None):
     """Function to tell user if patient with given contact number already exists or not"""
+    if id is None:
+        db_patient = database.query(models.Patient).filter().first()
+        db_patient_details = database.query(models.PatientDetails).filter().first()
+        Merge(db_patient.__dict__, db_patient_details.__dict__)
+        return ResponseData.success(db_patient_details.__dict__,"Patient details fetched successfully")
     db_patient = database.query(models.Patient).filter(models.Patient.id == id).first()
     if db_patient is None:
         return ResponseData.success([],"Patient with this id does not exists")
