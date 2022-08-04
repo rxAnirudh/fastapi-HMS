@@ -1,7 +1,7 @@
 """Controller file for writing db queries"""
 from typing import Optional
 from sqlalchemy.orm import Session
-from models import models,schemas
+from doctor.app.models import models,schemas
 from response import Response as ResponseData
 
 
@@ -9,6 +9,12 @@ from response import Response as ResponseData
 def Merge(dict1, dict2):
     return(dict2.update(dict1))
 
+def check_if_doctor_id_is_valid(database: Session, id : Optional[int] = None):
+    doctor_data = database.query(models.Doctor).filter(models.Doctor.id == id).first()
+    if doctor_data:
+        return True
+    else:
+        return False
 
 def add_new_doctor(database: Session, doctor: schemas.DoctorBase):
     """Function to return query based data while creating new doctor creation api"""
