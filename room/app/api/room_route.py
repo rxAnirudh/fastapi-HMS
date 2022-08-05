@@ -1,7 +1,7 @@
 """File for hospital route"""
-from fastapi import Depends,  HTTPException, APIRouter
+from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
-from models import schemas
+from room.app.models import schemas
 from db import get_db
 
 from api import controller

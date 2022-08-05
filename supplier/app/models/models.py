@@ -1,6 +1,6 @@
 """File for creating models of the project"""
 
-from sqlalchemy import Column, TIMESTAMP, Integer,  String,Boolean
+from sqlalchemy import Column, Integer,  String
 from db import Base
 
 class Supplier(Base):

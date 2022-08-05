@@ -1,14 +1,12 @@
-import sys
-
-from fastapi import HTTPException
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 """Controller file for writing db queries"""
-from typing import Optional
 import sys
+from fastapi import HTTPException
+from typing import Optional
 from sqlalchemy.orm import Session
-from patient.app.models import models,schemas
 from response import Response as ResponseData
+from patient.app.models import models,schemas
 from hospital.app.api.controller import check_if_hospital_id_is_valid
+sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 
 
 # Python code to merge dict using update() method
@@ -70,6 +68,7 @@ def delete_patient_details(database: Session, id : Optional[int] = None):
     return ResponseData.success([],"Patient details deleted successfully")
 
 def check_if_patient_id_is_valid(database: Session, id : Optional[int] = None):
+    """Function to check if patient id exists or not"""
     hospital_data = database.query(models.Patient).filter(models.Patient.id == id).first()
     if hospital_data:
         return True

@@ -1,11 +1,8 @@
-"""File for creating models of the project"""
-
 from sqlalchemy import Column, Integer,  String
 from db import Base
 
-class Bill(Base):
-    """Class for creating bill model"""
-    __tablename__ = 'bill'
+class Demo(Base):
+    __tablename__ = 'demo'
 
     id = Column(Integer, primary_key=True, index=True)
     patient_id = Column(String, index=True)
@@ -15,9 +12,10 @@ class Bill(Base):
     operation_charge = Column(String, index=True)
     no_of_days = Column(String, index=True)
     nursing_charge = Column(String, index=True)
-    lab_charge = Column(Integer,index = True)
+    lab_charge = Column(String,index = True)
     insurance_number = Column(String, index=True)
     total_bill = Column(String, index=True)
     bill_date = Column(String,index=False)
     hospital_id = Column(String, index=True)
-    
+
+DATABASE_URL = 'postgresql://anirudh.chawla:123@localhost/demo'

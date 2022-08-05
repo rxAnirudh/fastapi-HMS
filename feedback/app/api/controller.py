@@ -6,7 +6,7 @@ sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-managem
 from typing import Optional
 from sqlalchemy.orm import Session
 from models import models,schemas
-from response import Response as ResponseData
+from response sponse as ResponseData
 from hospital.app.api.controller import check_if_hospital_id_is_valid
 from staff.app.api.controller import check_if_staff_id_is_valid
 from patient.app.api.controller import check_if_patient_id_is_valid

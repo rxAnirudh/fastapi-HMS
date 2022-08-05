@@ -1,9 +1,9 @@
 """Schema file for hospital table"""
-from asyncio.log import logger
-import re
+
+
 from typing import Optional
-from pydantic import BaseModel, FilePath, validator,EmailStr
 from datetime import datetime
+from pydantic import BaseModel
 
 
 class InsuranceBase(BaseModel):

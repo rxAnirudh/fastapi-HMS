@@ -50,22 +50,22 @@ def update_payroll_details(database: Session, payroll: schemas.AddNewPayroll):
     """Function to update payroll details"""
     data = database.query(models.Payroll).filter(models.Payroll.id == payroll.id).all()
     dict1 = data[0]
-    if bill.dict()["staff_id"] is not None :
-        dict1.__dict__["staff_id"] = bill.dict()["staff_id"]
-    if bill.dict()["salary"] is not None :
-        dict1.__dict__["salary"] = bill.dict()["salary"]
-    if bill.dict()["net_salary"] is not None :
-        dict1.__dict__["net_salary"] = bill.dict()["net_salary"]
-    if bill.dict()["hourly_salary"] is not None :
-        dict1.__dict__["hourly_salary"] = bill.dict()["hourly_salary"]
-    if bill.dict()["bonus_salary"] is not None :
-        dict1.__dict__["bonus_salary"] = bill.dict()["bonus_salary"]
-    if bill.dict()["compensation"] is not None :
-        dict1.__dict__["compensation"] = bill.dict()["compensation"]
-    if bill.dict()["account_no"] is not None :
-        dict1.__dict__["account_no"] = bill.dict()["account_no"]
-    if bill.dict()["hospital_id"] is not None :
-        dict1.__dict__["hospital_id"] = bill.dict()["hospital_id"]
+    if payroll.dict()["staff_id"] is not None :
+        dict1.__dict__["staff_id"] = payroll.dict()["staff_id"]
+    if payroll.dict()["salary"] is not None :
+        dict1.__dict__["salary"] = payroll.dict()["salary"]
+    if payroll.dict()["net_salary"] is not None :
+        dict1.__dict__["net_salary"] = payroll.dict()["net_salary"]
+    if payroll.dict()["hourly_salary"] is not None :
+        dict1.__dict__["hourly_salary"] = payroll.dict()["hourly_salary"]
+    if payroll.dict()["bonus_salary"] is not None :
+        dict1.__dict__["bonus_salary"] = payroll.dict()["bonus_salary"]
+    if payroll.dict()["compensation"] is not None :
+        dict1.__dict__["compensation"] = payroll.dict()["compensation"]
+    if payroll.dict()["account_no"] is not None :
+        dict1.__dict__["account_no"] = payroll.dict()["account_no"]
+    if payroll.dict()["hospital_id"] is not None :
+        dict1.__dict__["hospital_id"] = payroll.dict()["hospital_id"]
     database.query(models.Payroll).filter(models.Payroll.id == payroll.id).update({ models.Payroll.id : payroll.id,
         models.Payroll.staff_id: dict1.__dict__["staff_id"],
         models.Payroll.salary : dict1.__dict__["salary"],

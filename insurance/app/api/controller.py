@@ -1,14 +1,12 @@
+"""Function for insurance schema"""
 import sys
-
-from fastapi import HTTPException
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
-"""Controller file for writing db queries"""
 from typing import Optional
-import sys
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from insurance.app.models import models,schemas
 from response import Response as ResponseData
+from insurance.app.models import models,schemas
 from patient.app.api.controller import check_if_patient_id_is_valid
+sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 
 
 # Python code to merge dict using update() method
@@ -94,6 +92,7 @@ def update_insurance_details(database: Session, insurance: schemas.AddNewInsuran
         dict1.__dict__["co_insurance"] = insurance.dict()["co_insurance"]
     if insurance.dict()["med_coverage"] is not None :
         dict1.__dict__["med_coverage"] = insurance.dict()["med_coverage"]
+
     
     database.query(models.Insurance).filter(models.Insurance.id == insurance.id).update({ models.Insurance.id : insurance.id,
         models.Insurance.policy_no: dict2.__dict__["policy_no"],

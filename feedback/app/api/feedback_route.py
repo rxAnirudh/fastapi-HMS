@@ -1,12 +1,11 @@
 """File for patient route"""
 import sys
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
-from fastapi import Depends,  HTTPException, APIRouter
+from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
-from feedback.app.models import schemas
 from db import get_db
-
 from api import controller
+from feedback.app.models import schemas
+sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 
 feedback_router = APIRouter()
 

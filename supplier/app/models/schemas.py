@@ -1,8 +1,8 @@
 """Schema file for hospital table"""
-from asyncio.log import logger
-import re
+
+
 from typing import Optional
-from pydantic import BaseModel, FilePath, validator,EmailStr
+from pydantic import BaseModel
 
 
 class SupplierBase(BaseModel):
@@ -11,14 +11,16 @@ class SupplierBase(BaseModel):
     contact_number: Optional[str] = None
     email_id: Optional[str] = None
     address: Optional[str] = None
-    
-class AddNewSupplier(RoomBase):
+
+
+class AddNewSupplier(SupplierBase):
     """Create class model for supplier"""
     id : int
     company: Optional[str] = None
     contact_number: Optional[str] = None
     email_id: Optional[str] = None
     address: Optional[str] = None
+
 
 class AddSupplierResponse(BaseModel):
     """Create class model for response of new supplier to be added"""

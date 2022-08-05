@@ -1,7 +1,7 @@
 """Schema file for patient table"""
 from typing import Optional
-from pydantic import BaseModel
 from datetime import datetime
+from pydantic import BaseModel
 
 class FeedbackBase(BaseModel):
     """Base class model for feedback"""

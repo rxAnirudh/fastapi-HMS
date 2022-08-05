@@ -1,10 +1,6 @@
 """File for creating models of the project"""
 
-from datetime import datetime
-from operator import index
-from fastapi import File
-from pydantic import FilePath
-from sqlalchemy import Column, TIMESTAMP, Integer,  String
+from sqlalchemy import Column, Integer,  String
 from db import Base
 
 class Feedback(Base):

@@ -9,13 +9,14 @@ from sqlalchemy.orm import sessionmaker
 
 # DATABASE_URL = Config.DATABASE_URL
 
-engine = create_engine(url="postgresql://anirudh.chawla:123@localhost/hospital_management")
+engine = create_engine(url="postgresql://anirudh.chawla:123@localhost/feedback")
 
 SessionLocal = sessionmaker(bind=engine,autocommit=False,autoflush=False)
 
 Base = declarative_base()
 
 def get_db():
+    """Function to get db details"""
     db = SessionLocal()
     try:
         yield db

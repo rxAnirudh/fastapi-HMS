@@ -1,13 +1,7 @@
 """Schema file for patient table"""
-from asyncio.log import logger
-import re
 from typing import Optional
-from pydantic import BaseModel, FilePath, validator,EmailStr
 from datetime import datetime
-
-from sqlalchemy import TIMESTAMP
-
-from sqlalchemy.sql import func
+from pydantic import BaseModel
 
 class BillBase(BaseModel):
     """Base class model for bill"""
@@ -23,7 +17,8 @@ class BillBase(BaseModel):
     total_bill: Optional[str] = None
     bill_date: Optional[str] = str(datetime.utcnow())
     hospital_id: Optional[str] = None
-    
+
+
 class AddNewBill(BillBase):
     """Create class model for bill"""
     id : int
