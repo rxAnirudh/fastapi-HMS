@@ -1,18 +1,41 @@
 """File for hospital route"""
-from fastapi import Depends, APIRouter
+import os
+from fastapi import Depends, APIRouter, File, Form, UploadFile
 from sqlalchemy.orm import Session
 from models import schemas
 from db import get_db
+from datetime import datetime
 
 from api import controller
 
 patient_report_router = APIRouter()
 
+IMAGE_DIR_PATH = "/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/patient_report/patient_report_images"
+
+async def create_file(file=File(None)):
+    try:
+        contents = await file.read()
+        path = os.path.join(IMAGE_DIR_PATH, file.filename)
+        with open(path, 'wb') as f:
+            f.write(contents)
+    finally:
+        await file.close()
 
 @patient_report_router.post("/add_new_patient_report", response_model=schemas.AddPatientReportResponse)
-def add_new_patient_report(patient_report: schemas.PatientReportBase, database: Session = Depends(get_db)):
+async def add_new_patient_report(patient_report_file: list[UploadFile], patient_id: str = Form(default=''), report_id: str = Form(default=''), 
+                      diagnose: str = Form(default=''),
+                      reference: str = Form(default=''), medicine_id: str = Form(default=""),
+                      medicine_name: str = Form(default=''), doctor_id: str = Form(default=""),
+                      hospital_id: str = Form(default=''),db: Session = Depends(get_db)):
     """Function to return final response while adding new patient report details"""
-    return controller.add_new_patient_report(database,patient_report)
+    filenames = []
+    if len(patient_report_file) > 0:
+      for f in patient_report_file:
+          await create_file(f)
+          filenames.append(f.filename)
+    return controller.add_new_patient_report(db, filenames, patient_id, report_id,
+                              diagnose, reference, medicine_id, 
+                              medicine_name,doctor_id,hospital_id,)
 
 
 @patient_report_router.post("/get_patient_report_details")
@@ -30,6 +53,17 @@ def delete_patient_report_details(patient_report_id: schemas.PatientReportId, da
 
 
 @patient_report_router.post("/update_patient_report_details")
-def update_patient_report_details(patient_report_details: schemas.PatientReportId, database: Session = Depends(get_db)):
+async def update_patient_report_details(patient_report_file: list[UploadFile], patient_id: str = Form(default=''), report_id: str = Form(default=''), 
+                      diagnose: str = Form(default=''),
+                      reference: str = Form(default=''), medicine_id: str = Form(default=""),
+                      medicine_name: str = Form(default=''), doctor_id: str = Form(default=""),
+                      hospital_id: str = Form(default=''),patient_report_id: str = Form(default=''),db: Session = Depends(get_db)):
     """Function to update particular patient report details"""
-    return controller.update_patient_report_details(database, patient_report = patient_report_details)
+    filenames = []
+    if len(patient_report_file) > 0:
+      for f in patient_report_file:
+          await create_file(f)
+          filenames.append(f.filename)
+    return controller.update_patient_report_details(db, filenames, patient_id, report_id,
+                              diagnose, reference, medicine_id, 
+                              medicine_name,doctor_id,hospital_id,patient_report_id)

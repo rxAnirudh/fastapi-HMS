@@ -1,6 +1,7 @@
 """Controller file for writing db queries"""
-from typing import Optional
+from typing import List, Optional
 import sys
+from sqlalchemy import Integer
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from response import Response as ResponseData
@@ -16,13 +17,39 @@ def Merge(dict1, dict2):
     """Function to merge dict using update method"""
     return dict2.update(dict1)
 
-def add_new_bill(database: Session, bill: schemas.BillBase):
+def add_new_bill(database: Session, file: list(), patient_id: str, doctor_charge: str, medicine_charge: str,
+                      room_charge: str, operation_charge: str,
+                      nursing_charge: str, lab_charge: str,
+                      insurance_number: str, total_bill: str,
+                      bill_date: str, hospital_id: str,
+                       no_of_days: str):
     """Function to return query based data while creating new bill creation api"""
-    if not check_if_hospital_id_is_valid(database,bill.dict()["hospital_id"]):
+    if not check_if_hospital_id_is_valid(database,hospital_id):
         raise HTTPException(status_code=400, detail="Hospital id is invalid")
-    if not check_if_patient_id_is_valid(database,bill.dict()["patient_id"]):
+    if not check_if_patient_id_is_valid(database,patient_id):
         raise HTTPException(status_code=400, detail="Patient id is invalid")
-    db_bill = models.Bill(**bill.__dict__)
+    filedata = ''
+    for i in file:
+        if len(file) == 1:
+           filedata+='{0}'.format(i)
+        elif len(file) > 1:
+           filedata+='{i},'.format(i)
+    billdata = {
+        "patient_id": patient_id,
+  "doctor_charge": doctor_charge,
+  "medicine_charge": medicine_charge,
+  "room_charge": room_charge,
+  "operation_charge": operation_charge,
+  "no_of_days": no_of_days,
+  "nursing_charge": nursing_charge,
+  "lab_charge": lab_charge,
+  "insurance_number": insurance_number,
+  "total_bill": total_bill,
+  "bill_photo": filedata,
+  "bill_date": bill_date,
+  "hospital_id": hospital_id
+    }
+    db_bill = models.Bill(**billdata)
     database.add(db_bill)
     database.commit()
     database.refresh(db_bill)
@@ -45,35 +72,46 @@ def delete_bill_details(database: Session, id : Optional[int] = None):
     database.commit()
     return ResponseData.success([],"Bill details deleted successfully")
 
-def update_bill_details(database: Session, bill: schemas.AddNewBill):
+def update_bill_details(database: Session, file: list(), patient_id: str, doctor_charge: str, medicine_charge: str,
+                      room_charge: str, operation_charge: str,
+                      nursing_charge: str, lab_charge: str,
+                      insurance_number: str, total_bill: str,
+                      bill_date: str, hospital_id: str,
+                       no_of_days: str,bill_id: Integer):
     """Function to update bill details"""
-    data = database.query(models.Bill).filter(models.Bill.id == bill.id).all()
+    data = database.query(models.Bill).filter(models.Bill.id == bill_id).all()
     dict1 = data[0]
-    print('bill.dict()["nursing_charge"]')
-    print(bill.dict()["nursing_charge"])
-    if bill.dict()["patient_id"] is not None :
-        dict1.__dict__["patient_id"] = bill.dict()["patient_id"]
-    if bill.dict()["doctor_charge"] is not None :
-        dict1.__dict__["doctor_charge"] = bill.dict()["doctor_charge"]
-    if bill.dict()["medicine_charge"] is not None :
-        dict1.__dict__["medicine_charge"] = bill.dict()["medicine_charge"]
-    if bill.dict()["room_charge"] is not None :
-        dict1.__dict__["room_charge"] = bill.dict()["room_charge"]
-    if bill.dict()["operation_charge"] is not None :
-        dict1.__dict__["operation_charge"] = bill.dict()["operation_charge"]
-    if bill.dict()["no_of_days"] is not None :
-        dict1.__dict__["no_of_days"] = bill.dict()["no_of_days"]
-    if bill.dict()["nursing_charge"] is not None :
-        dict1.__dict__["nursing_charge"] = bill.dict()["nursing_charge"]
-    if bill.dict()["lab_charge"] is not None :
-        dict1.__dict__["lab_charge"] = bill.dict()["lab_charge"]
-    if bill.dict()["insurance_number"] is not None :
-        dict1.__dict__["insurance_number"] = bill.dict()["insurance_number"]
-    if bill.dict()["total_bill"] is not None :
-        dict1.__dict__["total_bill"] = bill.dict()["total_bill"]
-    if bill.dict()["bill_date"] is not None :
-        dict1.__dict__["bill_date"] = bill.dict()["bill_date"]
-    database.query(models.Bill).filter(models.Bill.id == bill.id).update({ models.Bill.id : bill.id,
+    if patient_id != '' :
+        dict1.__dict__["patient_id"] = patient_id
+    if len(file) > 0 :
+        filedata = ''
+        for i in file:
+            if len(file) == 1:
+               filedata+='{0}'.format(i)
+            elif len(file) > 1:
+               filedata+='{i},'.format(i)
+        dict1.__dict__["bill_photo"] = filedata
+    if doctor_charge != '' :
+        dict1.__dict__["doctor_charge"] = doctor_charge
+    if medicine_charge != '' :
+        dict1.__dict__["medicine_charge"] = medicine_charge
+    if room_charge != '' :
+        dict1.__dict__["room_charge"] = room_charge
+    if operation_charge != '' :
+        dict1.__dict__["operation_charge"] = operation_charge
+    if nursing_charge != '' :
+        dict1.__dict__["nursing_charge"] = nursing_charge
+    if lab_charge != '' :
+        dict1.__dict__["lab_charge"] = lab_charge
+    if insurance_number != '' :
+        dict1.__dict__["insurance_number"] = insurance_number
+    if total_bill != '' :
+        dict1.__dict__["total_bill"] = total_bill
+    if hospital_id != '' :
+        dict1.__dict__["hospital_id"] = hospital_id
+    if no_of_days != '' :
+        dict1.__dict__["no_of_days"] = no_of_days
+    database.query(models.Bill).filter(models.Bill.id == bill_id).update({ models.Bill.id : bill_id,
         models.Bill.patient_id: dict1.__dict__["patient_id"],
         models.Bill.doctor_charge : dict1.__dict__["doctor_charge"],
         models.Bill.medicine_charge : dict1.__dict__["medicine_charge"],
@@ -85,6 +123,7 @@ def update_bill_details(database: Session, bill: schemas.AddNewBill):
         models.Bill.insurance_number : dict1.__dict__["insurance_number"],
         models.Bill.total_bill : dict1.__dict__["total_bill"],
         models.Bill.bill_date : dict1.__dict__["bill_date"],
+        models.Bill.bill_photo : dict1.__dict__["bill_photo"],
     })
     database.flush()
     database.commit()

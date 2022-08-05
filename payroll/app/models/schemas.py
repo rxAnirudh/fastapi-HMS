@@ -13,6 +13,7 @@ class PayrollBase(BaseModel):
     compensation: Optional[str] = None
     account_no: Optional[str] = None
     hospital_id: Optional[str] = None
+    payroll_slip: Optional[str] = None
     
     
 class AddNewPayroll(PayrollBase):
@@ -26,7 +27,9 @@ class AddNewPayroll(PayrollBase):
     compensation: Optional[str] = None
     account_no: Optional[str] = None
     hospital_id: Optional[str] = None
+    payroll_slip: Optional[str] = None
 
+    
 class AddPayrollResponse(BaseModel):
     """Create class model for response of new payroll to be added"""
     data : AddNewPayroll

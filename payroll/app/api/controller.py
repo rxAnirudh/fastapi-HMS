@@ -1,6 +1,7 @@
 import sys
 
 from fastapi import HTTPException
+from sqlalchemy import Integer
 sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 """Controller file for writing db queries"""
 from typing import Optional
@@ -17,13 +18,32 @@ def Merge(dict1, dict2):
     """Function to merge dict using update method"""
     return dict2.update(dict1)
 
-def add_new_payroll(database: Session, payroll: schemas.PayrollBase):
+def add_new_payroll(database: Session, file: list(), staff_id: str, salary: str, net_salary: str,
+                      hourly_salary: str, bonus_salary: str,
+                      compensation: str, account_no: str,
+                      hospital_id: str):
     """Function to add new payroll of staff working in hospital"""
-    if not check_if_hospital_id_is_valid(database,payroll.dict()["hospital_id"]):
+    if not check_if_hospital_id_is_valid(database,hospital_id):
         raise HTTPException(status_code=400, detail="Hospital id is invalid")
-    if not check_if_staff_id_is_valid(database,payroll.dict()["staff_id"]):
+    if not check_if_staff_id_is_valid(database,staff_id):
         raise HTTPException(status_code=400, detail="Staff id is invalid")
-    db_payroll = models.Payroll(**payroll.__dict__)
+    filedata = ''
+    for i in file:
+        if len(file) == 1:
+           filedata+=i
+        elif len(file) > 1:
+           filedata+=i+','
+    payrolldata = {
+        "staff_id": staff_id,
+  "net_salary": net_salary,
+  "hourly_salary": hourly_salary,
+  "bonus_salary": bonus_salary,
+  "compensation": compensation,
+  "account_no": account_no,
+  "hospital_id": hospital_id,
+  'payroll_slip' : filedata
+    }
+    db_payroll = models.Payroll(**payrolldata)
     database.add(db_payroll)
     database.commit()
     database.refresh(db_payroll)
@@ -46,27 +66,38 @@ def delete_payroll_details(database: Session, id : Optional[int] = None):
     database.commit()
     return ResponseData.success([],"Payroll details deleted successfully")
 
-def update_payroll_details(database: Session, payroll: schemas.AddNewPayroll):
+def update_payroll_details(database: Session, file: list(), staff_id: str, salary: str, net_salary: str,
+                      hourly_salary: str, bonus_salary: str,
+                      compensation: str, account_no: str,
+                      hospital_id: str,payroll_id: Integer):
     """Function to update payroll details"""
-    data = database.query(models.Payroll).filter(models.Payroll.id == payroll.id).all()
+    data = database.query(models.Payroll).filter(models.Payroll.id == payroll_id).all()
     dict1 = data[0]
-    if payroll.dict()["staff_id"] is not None :
-        dict1.__dict__["staff_id"] = payroll.dict()["staff_id"]
-    if payroll.dict()["salary"] is not None :
-        dict1.__dict__["salary"] = payroll.dict()["salary"]
-    if payroll.dict()["net_salary"] is not None :
-        dict1.__dict__["net_salary"] = payroll.dict()["net_salary"]
-    if payroll.dict()["hourly_salary"] is not None :
-        dict1.__dict__["hourly_salary"] = payroll.dict()["hourly_salary"]
-    if payroll.dict()["bonus_salary"] is not None :
-        dict1.__dict__["bonus_salary"] = payroll.dict()["bonus_salary"]
-    if payroll.dict()["compensation"] is not None :
-        dict1.__dict__["compensation"] = payroll.dict()["compensation"]
-    if payroll.dict()["account_no"] is not None :
-        dict1.__dict__["account_no"] = payroll.dict()["account_no"]
-    if payroll.dict()["hospital_id"] is not None :
-        dict1.__dict__["hospital_id"] = payroll.dict()["hospital_id"]
-    database.query(models.Payroll).filter(models.Payroll.id == payroll.id).update({ models.Payroll.id : payroll.id,
+    if staff_id != '' :
+        dict1.__dict__["staff_id"] = staff_id
+    if len(file) > 0 :
+        filedata = ''
+        for i in file:
+            if len(file) == 1:
+               filedata+='{0}'.format(i)
+            elif len(file) > 1:
+               filedata+='{i},'.format(i)
+        dict1.__dict__["payroll_slip"] = filedata
+    if salary != '' :
+        dict1.__dict__["salary"] = salary
+    if net_salary != '' :
+        dict1.__dict__["net_salary"] = net_salary
+    if hourly_salary != '' :
+        dict1.__dict__["hourly_salary"] = hourly_salary
+    if bonus_salary != '' :
+        dict1.__dict__["bonus_salary"] = bonus_salary
+    if compensation != '' :
+        dict1.__dict__["compensation"] = compensation
+    if account_no != '' :
+        dict1.__dict__["account_no"] = account_no
+    if hospital_id != '' :
+        dict1.__dict__["hospital_id"] = hospital_id
+    database.query(models.Payroll).filter(models.Payroll.id == payroll_id).update({ models.Payroll.id : payroll_id,
         models.Payroll.staff_id: dict1.__dict__["staff_id"],
         models.Payroll.salary : dict1.__dict__["salary"],
         models.Payroll.net_salary : dict1.__dict__["net_salary"],
@@ -75,6 +106,7 @@ def update_payroll_details(database: Session, payroll: schemas.AddNewPayroll):
         models.Payroll.compensation : dict1.__dict__["compensation"],
         models.Payroll.account_no : dict1.__dict__["account_no"],
         models.Payroll.hospital_id : dict1.__dict__["hospital_id"],
+        models.Payroll.payroll_slip : dict1.__dict__["payroll_slip"],
     })
     database.flush()
     database.commit()

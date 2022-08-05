@@ -15,6 +15,7 @@ class PatientReportBase(BaseModel):
     medicine_name: Optional[str] = None
     doctor_id: Optional[str] = None
     hospital_id: Optional[str] = None
+    patient_report_file: Optional[str] = None
     
 class AddNewPatientReport(PatientReportBase):
     """Create class model for patient report"""
@@ -27,6 +28,7 @@ class AddNewPatientReport(PatientReportBase):
     medicine_name: Optional[str] = None
     doctor_id: Optional[str] = None
     hospital_id: Optional[str] = None
+    patient_report_file: Optional[str] = None
 
 class AddPatientReportResponse(BaseModel):
     """Create class model for response of new patient report to be added"""

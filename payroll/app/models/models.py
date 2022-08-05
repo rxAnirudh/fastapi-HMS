@@ -20,5 +20,7 @@ class Payroll(Base):
     compensation = Column(String, index=True)
     account_no = Column(String, index=True)
     hospital_id = Column(String, index=True)
+    payroll_slip = Column(String,index=True)
+
     
     

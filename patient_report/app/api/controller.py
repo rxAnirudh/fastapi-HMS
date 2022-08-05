@@ -1,6 +1,7 @@
 import sys
 
 from fastapi import HTTPException
+from sqlalchemy import INTEGER, Integer
 sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 """Controller file for writing db queries"""
 from typing import Optional
@@ -19,15 +20,35 @@ def Merge(dict1, dict2):
     return dict2.update(dict1)
 
 
-def add_new_patient_report(database: Session, patientreport: schemas.PatientReportBase):
+def add_new_patient_report(database: Session, file: list(), patient_id: str, report_id: str, diagnose: str,
+                      reference: str, medicine_id: str,
+                      medicine_name: str, doctor_id: str,
+                      hospital_id: str):
     """Function to add new patient report details"""
-    if not check_if_hospital_id_is_valid(database,patientreport.dict()["hospital_id"]):
+    if not check_if_hospital_id_is_valid(database,hospital_id):
         raise HTTPException(status_code=400, detail="Hospital id is invalid")
-    if not check_if_patient_id_is_valid(database,patientreport.dict()["patient_id"]):
+    if not check_if_patient_id_is_valid(database,patient_id):
         raise HTTPException(status_code=400, detail="Patient id is invalid")
-    if not check_if_doctor_id_is_valid(database,patientreport.dict()["hospital_id"]):
+    if not check_if_doctor_id_is_valid(database,doctor_id):
         raise HTTPException(status_code=400, detail="Doctor id is invalid")
-    db_patient_report = models.Supplier(**patientreport.__dict__)
+    filedata = ''
+    for i in file:
+        if len(file) == 1:
+           filedata+=i
+        elif len(file) > 1:
+           filedata+=i+','
+    patientreportdata = {
+        "patient_id": patient_id,
+  "report_id": report_id,
+  "diagnose": diagnose,
+  "reference": reference,
+  "medicine_id": medicine_id,
+  "medicine_name": medicine_name,
+  "doctor_id": doctor_id,
+  "hospital_id": hospital_id,
+  'patient_report_file' : filedata
+    }
+    db_patient_report = models.PatientReport(**patientreportdata)
     database.add(db_patient_report)
     database.commit()
     database.refresh(db_patient_report)
@@ -55,28 +76,40 @@ def delete_patient_report_details(database: Session, id : Optional[int] = None):
     database.commit()
     return ResponseData.success([],"Patient report details deleted successfully")
 
-def update_patient_report_details(database: Session, patient_report: schemas.AddNewPatientReport):
+def update_patient_report_details(database: Session, file: list(), patient_id: str, report_id: str, diagnose: str,
+                      reference: str, medicine_id: str,
+                      medicine_name: str, doctor_id: str,
+                      hospital_id: str,patient_report_id: Integer):
     """Function to update patient report details"""
-    data = database.query(models.PatientReport).filter(models.PatientReport.id == patient_report.id).all()
+    data = database.query(models.PatientReport).filter(models.PatientReport.id == patient_report_id).all()
     dict1 = data[0]
-    if patient_report.dict()["patient_id"] is not None :
-        dict1.__dict__["patient_id"] = patient_report.dict()["patient_id"]
-    if patient_report.dict()["report_id"] is not None :
-        dict1.__dict__["report_id"] = patient_report.dict()["report_id"]
-    if patient_report.dict()["diagnose"] is not None :
-        dict1.__dict__["diagnose"] = patient_report.dict()["diagnose"]
-    if patient_report.dict()["reference"] is not None :
-        dict1.__dict__["reference"] = patient_report.dict()["reference"]
-    if patient_report.dict()["medicine_id"] is not None :
-        dict1.__dict__["medicine_id"] = patient_report.dict()["medicine_id"]
-    if patient_report.dict()["medicine_name"] is not None :
-        dict1.__dict__["medicine_name"] = patient_report.dict()["medicine_name"]
-    if patient_report.dict()["doctor_id"] is not None :
-        dict1.__dict__["doctor_id"] = patient_report.dict()["doctor_id"]
-    if patient_report.dict()["hospital_id"] is not None :
-        dict1.__dict__["hospital_id"] = patient_report.dict()["hospital_id"]
-    
-    database.query(models.PatientReport).filter(models.PatientReport.id == patient_report.id).update({ models.PatientReport.id : patient_report.id,
+    if patient_id != '' :
+        dict1.__dict__["patient_id"] = patient_id
+    if len(file) > 0 :
+        filedata = ''
+        for i in file:
+            if len(file) == 1:
+               filedata+='{0}'.format(i)
+            elif len(file) > 1:
+               filedata+='{i},'.format(i)
+        dict1.__dict__["patient_report_file"] = filedata
+    if report_id != '' :
+        dict1.__dict__["report_id"] = report_id
+    if diagnose != '' :
+        dict1.__dict__["diagnose"] = diagnose
+    if reference != '' :
+        dict1.__dict__["reference"] = reference
+    if medicine_id != '' :
+        dict1.__dict__["medicine_id"] = medicine_id
+    if medicine_name != '' :
+        dict1.__dict__["medicine_name"] = medicine_name
+    if doctor_id != '' :
+        dict1.__dict__["doctor_id"] = doctor_id
+    if hospital_id != '' :
+        dict1.__dict__["hospital_id"] = hospital_id
+    if patient_report_id != '' :
+        dict1.__dict__["patient_report_id"] = patient_report_id
+    database.query(models.PatientReport).filter(models.PatientReport.id == patient_report_id).update({ models.PatientReport.id : patient_report_id,
         models.PatientReport.patient_id: dict1.__dict__["patient_id"],
         models.PatientReport.report_id : dict1.__dict__["report_id"],
         models.PatientReport.diagnose : dict1.__dict__["diagnose"],
@@ -85,6 +118,7 @@ def update_patient_report_details(database: Session, patient_report: schemas.Add
         models.PatientReport.medicine_name : dict1.__dict__["medicine_name"],
         models.PatientReport.doctor_id : dict1.__dict__["doctor_id"],
         models.PatientReport.hospital_id : dict1.__dict__["hospital_id"],
+        models.PatientReport.patient_report_file : dict1.__dict__["patient_report_file"],
     })
     database.flush()
     database.commit()

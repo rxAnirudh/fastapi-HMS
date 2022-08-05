@@ -1,7 +1,9 @@
 """Schema file for patient table"""
-from typing import Optional
+from typing import List, Optional
 from datetime import datetime
+from fastapi import File, Form
 from pydantic import BaseModel
+
 
 class BillBase(BaseModel):
     """Base class model for bill"""
@@ -15,8 +17,12 @@ class BillBase(BaseModel):
     lab_charge: Optional[str] = None
     insurance_number: Optional[str] = None
     total_bill: Optional[str] = None
+    bill_photo: Optional[str] = None
     bill_date: Optional[str] = str(datetime.utcnow())
     hospital_id: Optional[str] = None
+
+    class Config:
+        orm_mode = True
 
 
 class AddNewBill(BillBase):
@@ -32,6 +38,7 @@ class AddNewBill(BillBase):
     lab_charge: Optional[str] = None
     insurance_number: Optional[str] = None
     total_bill: Optional[str] = None
+    bill_photo: Optional[str] = None
     bill_date: Optional[str] = None
     hospital_id: Optional[str] = None
 

@@ -16,4 +16,5 @@ class PatientReport(Base):
     medicine_name = Column(String, index=True)
     doctor_id = Column(String, index=True)
     hospital_id = Column(String, index=True)
+    patient_report_file = Column(String,index=True)
     
