@@ -1,8 +1,10 @@
 """Controller file for writing db queries"""
 import sys
-from fastapi import HTTPException
+from fastapi import HTTPException,Request
 from typing import Optional
 from sqlalchemy.orm import Session
+from authentication import Authentication
+from jwt_utility import JWTUtility
 from response import Response as ResponseData
 from patient.app.models import models,schemas
 from hospital.app.api.controller import check_if_hospital_id_is_valid
@@ -37,9 +39,15 @@ def add_new_patient(database: Session, patient: schemas.PatientBase):
     database.commit()
     database.refresh(db_patient_details)
     Merge(patient_dict, patient_details_dict)
+    token = {
+        'authentication_token' : JWTUtility.encode_token(db_patient.email,db_patient.contact_number)
+    }
+    print("tokendsddcd")
+    print(token['authentication_token'])
+    Merge(token, patient_details_dict)
     return ResponseData.success(patient_details_dict,"Patient added successfully")
 
-def get_patient(database: Session, contact_number : str):
+def get_patient(request:Request,database: Session, contact_number : str):
     """Function to tell user if patient with given contact number already exists or not"""
     return database.query(models.Patient).filter(models.Patient.contact_number == contact_number).first()
 

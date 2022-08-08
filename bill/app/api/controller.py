@@ -31,9 +31,9 @@ def add_new_bill(database: Session, file: list(), patient_id: str, doctor_charge
     filedata = ''
     for i in file:
         if len(file) == 1:
-           filedata+='{0}'.format(i)
+           filedata+=i
         elif len(file) > 1:
-           filedata+='{i},'.format(i)
+           filedata+=i+','
     billdata = {
         "patient_id": patient_id,
   "doctor_charge": doctor_charge,

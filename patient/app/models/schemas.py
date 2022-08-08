@@ -1,8 +1,9 @@
 """Schema file for patient table"""
-from asyncio.log import logger
+
+
 import re
 from typing import Optional
-from pydantic import BaseModel, FilePath, validator,EmailStr
+from pydantic import BaseModel, EmailStr, validator
 
 
 class PatientBase(BaseModel):
@@ -66,6 +67,7 @@ class AddNewPatient(PatientBase):
     food_preference: Optional[str] = None
     occupation: Optional[str] = None
     hospital_id: Optional[str] = None
+    # authentication_token: Optional[map] = None
 
 class AddPatientResponse(BaseModel):
     """Create class model for response of new patient to be added"""
