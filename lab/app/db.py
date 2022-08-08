@@ -3,13 +3,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+import lab.config
 
-
-# from config import Config
-
-# DATABASE_URL = Config.DATABASE_URL
-
-engine = create_engine(url="postgresql://anirudh.chawla:123@localhost/lab")
+DATABASE_URL = lab.config.Config.DATABASE_URL
+engine = create_engine(url=DATABASE_URL)
 
 SessionLocal = sessionmaker(bind=engine,autocommit=False,autoflush=False)
 
