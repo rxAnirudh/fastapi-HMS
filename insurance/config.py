@@ -1,9 +1,11 @@
 import os
 from dotenv import load_dotenv
-from dotenv import dotenv_values
 
-load_dotenv(dotenv_path='/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/insurance/.env.dev')
+
+base_dir = os.getcwd()
+load_dotenv(dotenv_path=f'{str(base_dir).replace("/app","")}/.env.dev')
 
 class Config: 
+    """Base configuration"""
     DATABASE_URL = os.getenv('DATABASE_URL')
 
