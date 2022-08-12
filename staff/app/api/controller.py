@@ -56,6 +56,22 @@ def get_staff_by_id(database: Session, id : Optional[int] = None):
     Merge(db_staff.__dict__, db_staff_details.__dict__)
     return ResponseData.success(db_staff_details.__dict__,"Staff details fetched successfully")
 
+def get_staff_by_pagination(database: Session,page : int,size:int):
+    """Function to get staff details by pagination"""
+    data = database.query(models.Staff,models.StaffDetails).filter(models.Staff.id == models.StaffDetails.id).all()
+    listdata = []
+    if(len(data) > 1):
+         for i, ele in enumerate(data):
+            dict1 = ele["StaffDetails"]
+            dict2 = ele["Staff"]
+            dict1.__dict__.update(dict2.__dict__)
+            listdata.append(dict1)      
+         data = listdata[page*size : (page*size) + size]
+         if len(data) > 0:
+                 return ResponseData.success(data,"Staff details fetched successfully")
+         return ResponseData.success([],"No Staff found")  
+    return ResponseData.success(listdata,"No Staff found")
+
 def delete_staff_details(database: Session, id : Optional[int] = None):
     """Function to delete single or all staff details if needed"""
     if id is None:

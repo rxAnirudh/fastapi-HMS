@@ -39,6 +39,10 @@ def update_appointment_details(request:Request,appointment_details: schemas.AddN
     Authentication().authenticate(request.headers.get('Authorization'),database)
     return controller.update_appointment_details(database, appointment = appointment_details)
 
+@appointment_router.get("/get_appointment_by_pagination")
+async def get_appointment_by_pagination(database: Session = Depends(get_db),page: int = 0, size: int = 5):
+    """Function to update particular hospital details"""
+    return controller.get_appointment_by_pagination(database,page,size)
 
 @appointment_router.post("/add_appointment_status", response_model=schemas.AddAppointmentStatusResponse)
 def add_appointment_status(appointment_status: schemas.AppointmentStatusBase, database: Session = Depends(get_db)):

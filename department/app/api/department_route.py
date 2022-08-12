@@ -20,6 +20,10 @@ def get_department(departmentid: schemas.DepartmentId, database: Session = Depen
     """Function to return department details (specific and all department data can be fetched)"""
     return controller.get_department_by_id(database, id = departmentid.id)
 
+@department_router.get("/get_department_by_pagination")
+async def get_department_by_pagination(database: Session = Depends(get_db),page: int = 0, size: int = 5):
+    """Function to update particular department details"""
+    return controller.get_department_by_pagination(database,page,size)
 
 @department_router.post('/delete_department')
 def delete_department(departmentid: schemas.DepartmentId, database: Session = Depends(get_db)):

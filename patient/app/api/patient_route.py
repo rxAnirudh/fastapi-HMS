@@ -29,6 +29,10 @@ def get_patient(request: Request,patientid: schemas.PatientId, database: Session
     Authentication().authenticate(request.headers.get('Authorization'),database)
     return controller.get_patient_by_id(database, id = patientid.id)
 
+@patient_router.get("/get_patient_by_pagination")
+async def get_patient_by_pagination(database: Session = Depends(get_db),page: int = 0, size: int = 5):
+    """Function to get patient details through pagination concept"""
+    return controller.get_patient_by_pagination(database,page,size)
 
 @patient_router.post("/delete_patient_details")
 def delete_patient(request: Request,patientid: schemas.PatientId, database: Session = Depends(get_db)):

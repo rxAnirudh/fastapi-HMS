@@ -21,14 +21,18 @@ def add_staff(staff: schemas.StaffBase, database: Session = Depends(get_db)):
 @staff_router.post("/get_staff_details")
 def get_staff(staffid: schemas.StaffId, database: Session = Depends(get_db)):
     """Function to return staff details
-    (specific and all doctor data can be fetched)"""
+    (specific and all staff data can be fetched)"""
     return controller.get_staff_by_id(database, id = staffid.id)
 
+@staff_router.get("/get_staff_by_pagination")
+async def get_staff_by_pagination(database: Session = Depends(get_db),page: int = 0, size: int = 5):
+    """Function to get staff details through pagination concept"""
+    return controller.get_staff_by_pagination(database,page,size)
 
 @staff_router.post("/delete_staff_details")
 def delete_staff(staffid: schemas.StaffId, database: Session = Depends(get_db)):
     """Function to return staff details
-    (specific and all hospitals data can be fetched)"""
+    (specific and all staff data can be deleted)"""
     return controller.delete_staff_details(database, id = staffid.id)
 
 

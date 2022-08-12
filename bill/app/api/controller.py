@@ -62,6 +62,16 @@ def get_bill_by_id(database: Session, id : Optional[int] = None):
         return ResponseData.success([],"Bill with this id does not exists")
     return ResponseData.success(db_bill.__dict__,"Bill details fetched successfully")
 
+def get_bill_by_pagination(database: Session,page : int,size:int):
+    """Function to fetch bill details by pagination"""
+    mainData = database.query(models.Bill).filter().all()
+    if(len(mainData) > 1):
+         data = mainData[page*size : (page*size) + size]
+         if len(data) > 0:
+                 return ResponseData.success(data,"Bill details fetched successfully")
+         return ResponseData.success([],"No Bill found")  
+    return ResponseData.success(mainData,"No Bill found")
+
 def delete_bill_details(database: Session, id : Optional[int] = None):
     """Function to delete single or all bill details if needed"""
     if id is None:

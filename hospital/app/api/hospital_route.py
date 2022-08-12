@@ -2,14 +2,13 @@
 from fastapi import Depends, APIRouter, FastAPI, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from hospital.app.models.models import Hospital
 from models import schemas
 from db import get_db
 from api import controller
-from fastapi_pagination import Page, add_pagination, paginate
 
 hospital_router = APIRouter()
 
+app = FastAPI()
 
 @hospital_router.post("/create_hospital", response_model=schemas.CreateHospitalResponse)
 def create_hospital(hospital: schemas.HospitalBase, database: Session = Depends(get_db)):
@@ -32,23 +31,12 @@ def search_hospital_by_name(hospitalname: schemas.HospitalName, database: Sessio
     (specific and all hospitals data can be fetched)"""
     return controller.search_hospital_by_name(database, hospital_name = hospitalname.name)
 
-class User(BaseModel):
-    name: str
-    surname: str
+fake_items_db = [{"item_name": "Foo"}, {"item_name": "Bar"}, {"item_name": "Baz"}]
 
-
-users = [
-    User(name='Yurii', surname='Karabas'),
-    # ...
-]
-
-app = FastAPI()
-
-@hospital_router.get("/get_hospital_by_pagination",response_model=Page[User])
-async def get_hospital_by_pagination(database: Session = Depends(get_db)):
+@hospital_router.get("/get_hospital_by_pagination")
+async def get_hospital_by_pagination(database: Session = Depends(get_db),page: int = 0, size: int = 5):
     """Function to update particular hospital details"""
-    add_pagination(app)
-    return paginate(users)
+    return controller.get_hospital_by_pagination(database,page,size)
 
 @hospital_router.post("/delete_hospital")
 def delete_hospital(hospitalid: schemas.HospitalId, database: Session = Depends(get_db)):

@@ -23,6 +23,10 @@ def get_medicine_details(medicineid: schemas.MedicineId, database: Session = Dep
     (specific and all medicine data can be fetched)"""
     return controller.get_medicine_by_id(database, id = medicineid.id)
 
+@medicine_router.get("/get_medicine_by_pagination")
+async def get_medicine_by_pagination(database: Session = Depends(get_db),page: int = 0, size: int = 5):
+    """Function to get medicine details through pagination concept"""
+    return controller.get_medicine_by_pagination(database,page,size)
 
 @medicine_router.post("/delete_medicine_details")
 def delete_medicine_details(medicineid: schemas.MedicineId, database: Session = Depends(get_db)):

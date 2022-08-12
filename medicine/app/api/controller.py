@@ -44,6 +44,22 @@ def get_medicine_by_id(database: Session, id : Optional[int] = None):
     Merge(db_medicine.__dict__, db_medicine_report.__dict__)
     return ResponseData.success(db_medicine_report.__dict__,"Medicine details fetched successfully")
 
+def get_medicine_by_pagination(database: Session,page : int,size:int):
+    """Function to get medicine details by pagination"""
+    data = database.query(models.Medicine,models.MedicineReport).filter(models.Medicine.id == models.MedicineReport.id).all()
+    listdata = []
+    if(len(data) > 1):
+         for i, ele in enumerate(data):
+            dict1 = ele["MedicineReport"]
+            dict2 = ele["Medicine"]
+            dict1.__dict__.update(dict2.__dict__)
+            listdata.append(dict1)      
+         data = listdata[page*size : (page*size) + size]
+         if len(data) > 0:
+                 return ResponseData.success(data,"Medicine details fetched successfully")
+         return ResponseData.success([],"No Medicine found")  
+    return ResponseData.success(listdata,"No Medicine found")
+
 def delete_medicine_details(database: Session, id : Optional[int] = None):
     """Function to delete single or all medicine details if needed"""
     if id is None:

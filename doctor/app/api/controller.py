@@ -74,6 +74,22 @@ def delete_doctor_details(database: Session, id : Optional[int] = None):
     database.commit()
     return ResponseData.success([],"Doctor details deleted successfully")
 
+def get_doctor_by_pagination(database: Session,page : int,size:int):
+    """Function to get doctor details by pagination"""
+    data = database.query(models.DoctorDetails,models.Doctor).filter(models.Doctor.id == models.DoctorDetails.id).all()
+    listdata = []
+    if(len(data) > 1):
+         for i, ele in enumerate(data):
+            dict1 = ele["DoctorDetails"]
+            dict2 = ele["Doctor"]
+            dict1.__dict__.update(dict2.__dict__)
+            listdata.append(dict1)      
+         data = listdata[page*size : (page*size) + size]
+         if len(data) > 0:
+                 return ResponseData.success(data,"Doctor details fetched successfully")
+         return ResponseData.success([],"No Doctor found")  
+    return ResponseData.success(listdata,"No Doctor found")
+
 def update_doctor_details(database: Session, doctor: schemas.AddNewDoctor):
     """Function to return query based data while creating add_new_doctor creation api"""
     data = database.query(models.DoctorDetails,models.Doctor).filter(models.Doctor.id == doctor.id).all()

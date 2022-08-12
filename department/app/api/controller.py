@@ -29,6 +29,15 @@ def get_department_by_id(database: Session, id : Optional[int] = None):
     db_department_details = database.query(models.Department).filter(models.Department.id == id).first()
     return ResponseData.success(db_department_details.__dict__,'Department details fetched successfully')
 
+def get_department_by_pagination(database: Session,page : int,size:int):
+    """Function to fetch department details by pagination"""
+    mainData = database.query(models.Department).filter().all()
+    if(len(mainData) > 1):
+         data = mainData[page*size : (page*size) + size]
+         if len(data) > 0:
+                 return ResponseData.success(data,"Department details fetched successfully")
+         return ResponseData.success([],"No Department found")  
+    return ResponseData.success(mainData,"No Department found")
 
 def delete_department_details(database: Session, id : Optional[int] = None):
     """Function to delete single or all department details if needed"""

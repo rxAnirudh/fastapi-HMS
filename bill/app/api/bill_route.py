@@ -53,6 +53,10 @@ def get_bill_details(request:Request,billid: schemas.BillId, database: Session =
     Authentication().authenticate(request.headers.get('Authorization'),database)
     return controller.get_bill_by_id(database, id = billid.id)
 
+@bill_router.get("/get_bill_by_pagination")
+async def get_bill_by_pagination(database: Session = Depends(get_db),page: int = 0, size: int = 5):
+    """Function to update particular bill details"""
+    return controller.get_bill_by_pagination(database,page,size)
 
 @bill_router.post("/delete_bill_details")
 def delete_bill_details(request:Request,billid: schemas.BillId, database: Session = Depends(get_db)):

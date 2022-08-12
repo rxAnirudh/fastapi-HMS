@@ -40,6 +40,16 @@ def get_appointment_by_id(database: Session, id : Optional[int] = None):
     db_appointment_details = database.query(models.Appointment).filter(models.Appointment.id == id).first()
     return ResponseData.success(db_appointment_details.__dict__,"Appointment details fetched successfully")
 
+def get_appointment_by_pagination(database: Session,page : int,size:int):
+    """Function to delete single or all hospitals if needed"""
+    mainData = database.query(models.Appointment).filter().all()
+    if(len(mainData) > 1):
+         data = mainData[page*size : (page*size) + size]
+         if len(data) > 0:
+                 return ResponseData.success(data,"Appointment details fetched successfully")
+         return ResponseData.success([],"No Appointment found")  
+    return ResponseData.success(mainData,"No Appointment found")
+
 def delete_appointment_details(database: Session, id : Optional[int] = None):
     """Function to delete single or all appointment details if needed"""
     if id is None:

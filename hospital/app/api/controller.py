@@ -85,10 +85,21 @@ def delete_hospital(database: Session, id : Optional[int] = None):
     database.commit()
     return ResponseData.success([],"Hospital deleted successfully")
 
-def get_hospital_by_pagination(database: Session):
+def get_hospital_by_pagination(database: Session,page : int,size:int):
     """Function to delete single or all hospitals if needed"""
-    hospital_data = database.query(models.HospitalDetails,models.Hospital).filter(models.Hospital.id == models.HospitalDetails.id).all()
-    return paginate(hospital_data)
+    data = database.query(models.HospitalDetails,models.Hospital).filter(models.Hospital.id == models.HospitalDetails.id).all()
+    listdata = []
+    if(len(data) > 1):
+         for i, ele in enumerate(data):
+            dict1 = ele["HospitalDetails"]
+            dict2 = ele["Hospital"]
+            dict1.__dict__.update(dict2.__dict__)
+            listdata.append(dict1)      
+         data = listdata[page*size : (page*size) + size]
+         if len(data) > 0:
+                 return ResponseData.success(data,"Hospital details fetched successfully")
+         return ResponseData.success([],"No hospital found")  
+    return ResponseData.success(listdata,"No hospital found")
 
 def update_hospital(database: Session, hospital: schemas.HospitalCreate):
     """Function to return query based data while creating new_hospital creation api"""

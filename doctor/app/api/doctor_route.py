@@ -1,5 +1,5 @@
 """File for hospital route"""
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, HTTPException
 from sqlalchemy.orm import Session
 from models import schemas
 from db import get_db
@@ -25,6 +25,10 @@ def get_doctor(doctodid: schemas.DoctorId, database: Session = Depends(get_db)):
     (specific and all doctor data can be fetched)"""
     return controller.get_doctor_by_id(database, id = doctodid.id)
 
+@doctor_router.get("/get_doctor_by_pagination")
+async def get_doctor_by_pagination(database: Session = Depends(get_db),page: int = 0, size: int = 5):
+    """Function to update particular doctor details"""
+    return controller.get_doctor_by_pagination(database,page,size)
 
 @doctor_router.post("/delete_doctor_details")
 def delete_doctor(doctodid: schemas.DoctorId, database: Session = Depends(get_db)):
