@@ -1,9 +1,12 @@
 """File for hospital route"""
-from fastapi import Depends, APIRouter, HTTPException
+from fastapi import Depends, APIRouter, FastAPI, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from hospital.app.models.models import Hospital
 from models import schemas
 from db import get_db
 from api import controller
+from fastapi_pagination import Page, add_pagination, paginate
 
 hospital_router = APIRouter()
 
@@ -23,6 +26,29 @@ def get_hospital(hospitalid: schemas.HospitalId, database: Session = Depends(get
     (specific and all hospitals data can be fetched)"""
     return controller.get_hospital_by_id(database, id = hospitalid.id)
 
+@hospital_router.post("/search_hospital_by_name")
+def search_hospital_by_name(hospitalname: schemas.HospitalName, database: Session = Depends(get_db)):
+    """Function to return hospital details
+    (specific and all hospitals data can be fetched)"""
+    return controller.search_hospital_by_name(database, hospital_name = hospitalname.name)
+
+class User(BaseModel):
+    name: str
+    surname: str
+
+
+users = [
+    User(name='Yurii', surname='Karabas'),
+    # ...
+]
+
+app = FastAPI()
+
+@hospital_router.get("/get_hospital_by_pagination",response_model=Page[User])
+async def get_hospital_by_pagination(database: Session = Depends(get_db)):
+    """Function to update particular hospital details"""
+    add_pagination(app)
+    return paginate(users)
 
 @hospital_router.post("/delete_hospital")
 def delete_hospital(hospitalid: schemas.HospitalId, database: Session = Depends(get_db)):

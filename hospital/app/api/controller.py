@@ -5,6 +5,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from hospital.app.models import models,schemas
 from response import Response as ResponseData
+from fastapi_pagination import Page, add_pagination, paginate
 
 
 # Python code to merge dict using update() method
@@ -59,6 +60,21 @@ def get_hospital_by_id(database: Session, id : Optional[int] = None):
     Merge(db_hospital.__dict__, db_hospital_details.__dict__)
     return ResponseData.success(db_hospital_details.__dict__,"Hospital details fetched successfully")
 
+def search_hospital_by_name(database: Session, hospital_name : Optional[str] = None):
+    """Function to get list of all hospital based on name search"""
+    data = database.query(models.HospitalDetails,models.Hospital).filter(models.Hospital.id == models.HospitalDetails.id).all()
+    list = []
+    if(len(data) > 1):
+     for i, ele in enumerate(data):
+        dict1 = ele["HospitalDetails"]
+        dict2 = ele["Hospital"]
+        if hospital_name in dict2.__dict__["name"]:
+           dict1.__dict__.update(dict2.__dict__)
+           list.append(dict1)
+    if len(list) == 0:
+        return ResponseData.success(list,"No hospital found with this name")
+    return ResponseData.success(list,"Hospital details fetched successfully")
+
 def delete_hospital(database: Session, id : Optional[int] = None):
     """Function to delete single or all hospitals if needed"""
     if id is None:
@@ -68,6 +84,11 @@ def delete_hospital(database: Session, id : Optional[int] = None):
     database.query(models.Hospital).filter_by(id = id).delete()
     database.commit()
     return ResponseData.success([],"Hospital deleted successfully")
+
+def get_hospital_by_pagination(database: Session):
+    """Function to delete single or all hospitals if needed"""
+    hospital_data = database.query(models.HospitalDetails,models.Hospital).filter(models.Hospital.id == models.HospitalDetails.id).all()
+    return paginate(hospital_data)
 
 def update_hospital(database: Session, hospital: schemas.HospitalCreate):
     """Function to return query based data while creating new_hospital creation api"""

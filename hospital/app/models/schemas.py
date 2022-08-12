@@ -1,6 +1,7 @@
 """Schema file for hospital table"""
 
 
+import re
 from typing import Optional
 from pydantic import BaseModel, validator,EmailStr
 
@@ -55,3 +56,8 @@ class GetHospitalResponse(BaseModel):
 class HospitalId(BaseModel):
     """Create class model for requesting id param in get hospital api"""
     id : Optional[int] = None
+
+
+class HospitalName(BaseModel):
+    """Create class model for requesting hospital name param in get hospital api"""
+    name : Optional[str] = None

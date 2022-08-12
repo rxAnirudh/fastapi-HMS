@@ -21,14 +21,18 @@ def add_new_patient(database: Session, patient: schemas.PatientBase):
     """Function to return query based data while creating new patient creation api"""
     if not check_if_hospital_id_is_valid(database,patient.dict()["hospital_id"]):
         raise HTTPException(status_code=400, detail="Hospital id is invalid")
-    patient_dict = {'first_name': patient.dict()["first_name"], 'last_name': patient.dict()["last_name"],"contact_number" : patient.dict()["contact_number"],
+    patient_dict = {
+        'first_name': patient.dict()["first_name"],
+         'last_name': patient.dict()["last_name"],
+         "contact_number" : patient.dict()["contact_number"],
     "profile_pic" : patient.dict()["profile_pic"],"email" : patient.dict()["email"],"gender" : patient.dict()["gender"],"date_of_birth" : patient.dict()["date_of_birth"],
     "blood_group" : patient.dict()["blood_group"],"hospital_id" : patient.dict()["hospital_id"]}
     db_patient = models.Patient(**patient_dict)
     database.add(db_patient)
     database.commit()
     database.refresh(db_patient)
-    patient_details_dict = {'marital_status': patient.dict()["marital_status"],"height" : patient.dict()["height"],
+    patient_details_dict = {
+        'marital_status': patient.dict()["marital_status"],"height" : patient.dict()["height"],
     "weight" : patient.dict()["weight"],"emergency_contact_number" : patient.dict()["emergency_contact_number"],"city" : patient.dict()["city"],
     "allergies" : patient.dict()["allergies"],"current_medications" : patient.dict()["current_medications"],"past_injuries" : patient.dict()["past_injuries"],
     "past_surgeries" : patient.dict()["past_surgeries"],"smoking_habits" : patient.dict()["smoking_habits"],
