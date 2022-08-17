@@ -2,7 +2,8 @@
 
 from datetime import datetime
 from operator import index
-from sqlalchemy import Column, TIMESTAMP, ForeignKey, Integer,  String
+from pydantic import validator
+from sqlalchemy import Column, TIMESTAMP, Integer,  String
 from db import Base
 
 

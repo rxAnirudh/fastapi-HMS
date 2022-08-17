@@ -1,6 +1,7 @@
 """Controller file for writing db queries"""
 from typing import Optional
 from sqlalchemy.orm import Session
+from doctor.app.error_handling import Error
 from response import Response as ResponseData
 from doctor.app.models import models,schemas
 
@@ -20,6 +21,10 @@ def check_if_doctor_id_is_valid(database: Session, id : Optional[int] = None):
 
 def add_new_doctor(database: Session, doctor: schemas.DoctorBase):
     """Function to return query based data while creating new doctor creation api"""
+    for key,value in doctor.dict().items():
+        is_error = Error.if_param_is_null_or_empty(doctor.dict()[key],key)
+        if is_error:
+            return ResponseData.success_without_data(f"{key} cannot be empty")
     doctor_dict = {'first_name': doctor.dict()["first_name"], 'last_name': doctor.dict()["last_name"],"contact_number" : doctor.dict()["contact_number"],
     "profile_pic" : doctor.dict()["profile_pic"],"email" : doctor.dict()["email"],"gender" : doctor.dict()["gender"],"date_of_birth" : doctor.dict()["date_of_birth"],
     "blood_group" : doctor.dict()["blood_group"]}

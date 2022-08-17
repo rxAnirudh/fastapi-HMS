@@ -1,6 +1,8 @@
 import sys
 
 from fastapi import HTTPException
+
+from staff.app.error_handling import Error
 sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 """Controller file for writing db queries"""
 from typing import Optional
@@ -25,6 +27,10 @@ def check_if_staff_id_is_valid(database: Session, id : Optional[int] = None):
 
 def add_new_staff(database: Session, staff: schemas.StaffBase):
     """Function to return query based data while creating new staff creation api"""
+    for key,value in staff.dict().items():
+        is_error = Error.if_param_is_null_or_empty(staff.dict()[key],key)
+        if is_error:
+            return ResponseData.success_without_data(f"{key} cannot be empty")
     if not check_if_hospital_id_is_valid(database,staff.dict()["hospital_id"]):
         raise HTTPException(status_code=400, detail="Hospital id is invalid")
     staff_dict = {'first_name': staff.dict()["first_name"], 'last_name': staff.dict()["last_name"],"contact_number" : staff.dict()["contact_number"],

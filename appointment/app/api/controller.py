@@ -1,6 +1,7 @@
 import sys
 
 from fastapi import HTTPException
+
 sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 """Controller file for writing db queries"""
 from typing import Optional
@@ -9,6 +10,9 @@ from sqlalchemy.orm import Session
 from models import models,schemas
 from response import Response as ResponseData
 from hospital.app.api.controller import check_if_hospital_id_is_valid
+from appointment.app.error_handling import Error
+from patient.app.api.controller import check_if_patient_id_is_valid
+
 
 
 # Python code to merge dict using update() method
@@ -19,10 +23,8 @@ def Merge(dict1, dict2):
 
 def add_new_appointment(database: Session, appointment: schemas.AppointmentBase):
     """Function to return query based data while creating new appointment creation api"""
-    if not check_if_hospital_id_is_valid(database,appointment.dict()["hospital_id"]):
-        raise HTTPException(status_code=400, detail="Hospital id is invalid")
-    # appointment_dict = {'patient_id': appointment.dict()["patient_id"], 'hospital_id': appointment.dict()["hospital_id"],"start_time" : appointment.dict()["start_time"],
-    # "end_time" : appointment.dict()["end_time"],"status_id" : appointment.dict()["status_id"],"booking_time" : appointment.dict()["booking_time"]}
+    Error.if_param_is_null_or_empty_or_not_valid(appointment.dict()["patient_id"],"patient Id",check_if_patient_id_is_valid(database,appointment.dict()["patient_id"]))
+    Error.if_param_is_null_or_empty_or_not_valid(appointment.dict()["hospital_id"],"Hospital Id",check_if_patient_id_is_valid(database,appointment.dict()["hospital_id"]))
     is_status_id_valid = database.query(models.AppointmentStatus).filter(models.AppointmentStatus.a_id == appointment.dict()["status_id"]).first()
     if not is_status_id_valid:
         raise HTTPException(status_code=400, detail="status id is invalid")
