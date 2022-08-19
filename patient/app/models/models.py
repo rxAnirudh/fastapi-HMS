@@ -31,12 +31,36 @@ class PatientDetails(Base):
     weight = Column(String,index = True)
     emergency_contact_number = Column(String, index=True)
     city = Column(String,index = True)
-    allergies = Column(String, index=True)
-    current_medications = Column(String,index = True)
-    past_injuries = Column(String,index = True)
-    past_surgeries = Column(String,index = True)
     smoking_habits = Column(String,index = True)
     alchol_consumption = Column(String,index = True)
     activity_level = Column(String,index = True)
     food_preference = Column(String,index = True)
     occupation = Column(String,index = True)
+
+class PatientAllergies(Base):
+    """Class for creating patient allergies model"""
+    __tablename__ = 'patient_allergies'
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(String, index=True)
+    allergy = Column(String, index=True)
+
+class PatientCurrentMedications(Base):
+    """Class for creating patient current medications model"""
+    __tablename__ = 'patient_current_medications'
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(String, index=True)
+    current_medication = Column(String, index=True)
+
+class PatientPastInjuries(Base):
+    """Class for creating patient past injuries model"""
+    __tablename__ = 'patient_past_injuries'
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(String, index=True)
+    past_injury = Column(String, index=True)
+
+class PatientPastSurgeries(Base):
+    """Class for creating patient past surgeries model"""
+    __tablename__ = 'patient_past_surgeries'
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(String, index=True)
+    past_surgery = Column(String, index=True)

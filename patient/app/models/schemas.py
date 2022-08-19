@@ -5,7 +5,6 @@ import re
 from typing import Optional
 from fastapi import File
 from pydantic import BaseModel, EmailStr, NonNegativeInt, validator
-from sqlalchemy import Integer
 
 
 class PatientBase(BaseModel):
@@ -23,10 +22,10 @@ class PatientBase(BaseModel):
     weight: Optional[str] = None
     emergency_contact_number: Optional[str] = None
     city: Optional[str] = None
-    allergies: Optional[str] = None
-    current_medications: Optional[str] = None
-    past_injuries: Optional[str] = None
-    past_surgeries: Optional[str] = None
+    allergy: Optional[str] = None
+    current_medication: Optional[str] = None
+    past_injury: Optional[str] = None
+    past_surgery: Optional[str] = None
     smoking_habits: Optional[str] = None
     alchol_consumption: Optional[str] = None
     activity_level: Optional[str] = None
@@ -60,10 +59,10 @@ class AddNewPatient(PatientBase):
     weight: Optional[str] = None
     emergency_contact_number: Optional[str] = None
     city: Optional[str] = None
-    allergies: Optional[str] = None
-    current_medications: Optional[str] = None
-    past_injuries: Optional[str] = None
-    past_surgeries: Optional[str] = None
+    allergy: Optional[str] = None
+    current_medication: Optional[str] = None
+    past_injury: Optional[str] = None
+    past_surgery: Optional[str] = None
     smoking_habits: Optional[str] = None
     alchol_consumption: Optional[str] = None
     activity_level: Optional[str] = None

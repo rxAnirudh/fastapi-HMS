@@ -2,7 +2,7 @@
 import os
 import sys
 from urllib import request
-
+import json
 from authentication import Authentication
 sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 from fastapi import Depends, APIRouter, Form, HTTPException, Request, UploadFile,File
@@ -33,13 +33,12 @@ async def add_patient(first_name: str = Form(), last_name: str = Form(),
                       hospital_id: int = None,marital_status: str = Form(default=''), height: str = Form(default=''), 
                       weight: str = Form(default=''),
                       emergency_contact_number: str = Form(default=''), city: str = Form(default=""),
-                      allergies: str = Form(default=''), current_medications: str = Form(default=""),
-                      past_injuries: str = Form(default=''),past_surgeries: str = Form(default=''), smoking_habits: str = Form(default=''), 
+                      allergy: str = Form(default=''), current_medication: str = Form(default=""),
+                      past_injury: str = Form(default=''),past_surgery: str = Form(default=''), smoking_habits: str = Form(default=''), 
                       alchol_consumption: str = Form(default=''),
                       activity_level: str = Form(default=''), food_preference: str = Form(default=""),
                       occupation: str = Form(default=''),db: Session = Depends(get_db)):
     """Function to return final response while adding new patient data"""
-    # Authentication().authenticate(request.headers.get('Authorization'),db)
     filename = ""
     if profile_pic is not None:
         filename = profile_pic.filename
@@ -47,8 +46,8 @@ async def add_patient(first_name: str = Form(), last_name: str = Form(),
     return controller.add_new_patient(db, filename, first_name, last_name,
                               contact_number, email, gender, 
                               date_of_birth,blood_group,hospital_id,marital_status,height,weight, emergency_contact_number, city,
-                              allergies, current_medications, past_injuries, 
-                              past_surgeries,smoking_habits,alchol_consumption,activity_level,food_preference,occupation)
+                              allergy, current_medication, past_injury, 
+                              past_surgery,smoking_habits,alchol_consumption,activity_level,food_preference,occupation)
 
 @patient_router.post("/get_patient_details")
 def get_patient(request: Request,patientid: schemas.PatientId, database: Session = Depends(get_db)):
@@ -78,8 +77,8 @@ async def update_patient_report_details(request: Request,patient_id: str = Form(
                       hospital_id: str = Form(default=''),marital_status: str = Form(default=''), height: str = Form(default=''), 
                       weight: str = Form(default=''),
                       emergency_contact_number: str = Form(default=''), city: str = Form(default=""),
-                      allergies: str = Form(default=''), current_medications: str = Form(default=""),
-                      past_injuries: str = Form(default=''),past_surgeries: str = Form(default=''), smoking_habits: str = Form(default=''), 
+                      allergy: list = Form(default=[]), current_medication: list = Form(default=[]),
+                      past_injury: list = Form(default=[]),past_surgery: list = Form(default=[]), smoking_habits: str = Form(default=''), 
                       alchol_consumption: str = Form(default=''),
                       activity_level: str = Form(default=''), food_preference: str = Form(default=""),
                       occupation: str = Form(default=''),db: Session = Depends(get_db),):
@@ -92,5 +91,5 @@ async def update_patient_report_details(request: Request,patient_id: str = Form(
     return controller.update_patient_details(db, filename, first_name, last_name,
                               contact_number, email, gender, 
                               date_of_birth,blood_group,hospital_id,marital_status,height,weight, emergency_contact_number, city,
-                              allergies, current_medications, past_injuries, 
-                              past_surgeries,smoking_habits,alchol_consumption,activity_level,food_preference,occupation,patient_id)
+                              allergy, current_medication, past_injury, 
+                              past_surgery,smoking_habits,alchol_consumption,activity_level,food_preference,occupation,patient_id)
