@@ -1,13 +1,16 @@
 """Controller file for writing db queries"""
 import sys
-from fastapi import HTTPException,Request
+from fastapi import HTTPException,Request, UploadFile
 from typing import Optional
+from sqlalchemy import Integer
 from sqlalchemy.orm import Session
 from authentication import Authentication
 from jwt_utility import JWTUtility
 from response import Response as ResponseData
 from patient.app.models import models,schemas
 from hospital.app.api.controller import check_if_hospital_id_is_valid
+from patient.app.error_handling import Error
+
 sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 
 
@@ -16,40 +19,65 @@ def Merge(dict1, dict2):
     """Function to merge dict using update method"""
     return dict2.update(dict1)
 
-
-def add_new_patient(database: Session, patient: schemas.PatientBase):
-    """Function to return query based data while creating new patient creation api"""
-    if not check_if_hospital_id_is_valid(database,patient.dict()["hospital_id"]):
-        raise HTTPException(status_code=400, detail="Hospital id is invalid")
-    patient_dict = {
-        'first_name': patient.dict()["first_name"],
-         'last_name': patient.dict()["last_name"],
-         "contact_number" : patient.dict()["contact_number"],
-    "profile_pic" : patient.dict()["profile_pic"],"email" : patient.dict()["email"],"gender" : patient.dict()["gender"],"date_of_birth" : patient.dict()["date_of_birth"],
-    "blood_group" : patient.dict()["blood_group"],"hospital_id" : patient.dict()["hospital_id"]}
-    db_patient = models.Patient(**patient_dict)
+def add_new_patient(database: Session, file: UploadFile, first_name: str, last_name: str, contact_number: str,
+                      email: str, gender: str,
+                      date_of_birth: str, blood_group: str,
+                      hospital_id: str,marital_status: str, height: str, weight: str,
+                      emergency_contact_number: str, city: str,
+                      allergies: str, current_medications: str,
+                      past_injuries: str,past_surgeries: str, smoking_habits: str, alchol_consumption: str,
+                      activity_level: str, food_preference: str,
+                      occupation: str):
+    """Function to add new patient data"""
+    db_patient_email = database.query(models.Patient).filter(models.Patient.email == email).first()
+    db_patient_number = database.query(models.Patient).filter(models.Patient.contact_number == contact_number).first()
+    if db_patient_email or db_patient_number:
+        return ResponseData.success_without_data("This user already exists")
+    patientdata = {
+        "first_name": first_name,
+  "last_name": last_name,
+  "contact_number": contact_number,
+  "email": email,
+  "gender": gender,
+  "date_of_birth": date_of_birth,
+  "blood_group": blood_group,
+  "hospital_id": hospital_id,
+  'profile_pic' : file
+    }
+    db_patient = models.Patient(**patientdata)
     database.add(db_patient)
     database.commit()
     database.refresh(db_patient)
-    patient_details_dict = {
-        'marital_status': patient.dict()["marital_status"],"height" : patient.dict()["height"],
-    "weight" : patient.dict()["weight"],"emergency_contact_number" : patient.dict()["emergency_contact_number"],"city" : patient.dict()["city"],
-    "allergies" : patient.dict()["allergies"],"current_medications" : patient.dict()["current_medications"],"past_injuries" : patient.dict()["past_injuries"],
-    "past_surgeries" : patient.dict()["past_surgeries"],"smoking_habits" : patient.dict()["smoking_habits"],
-    "alchol_consumption" : patient.dict()["alchol_consumption"],"activity_level" : patient.dict()["activity_level"],
-    "food_preference" : patient.dict()["food_preference"],"occupation" : patient.dict()["occupation"],"id" : db_patient.id,}
-    db_patient_details = models.PatientDetails(**patient_details_dict)
+    patient_details_data = {
+        "id" : db_patient.id,
+        "marital_status": marital_status,
+  "height": height,
+  "weight": weight,
+  "emergency_contact_number": emergency_contact_number,
+  "city": city,
+  "allergies": allergies,
+  "current_medications": current_medications,
+  "past_injuries": past_injuries,
+  'past_surgeries' : past_surgeries,
+  "smoking_habits" : smoking_habits,
+  "alchol_consumption": alchol_consumption,
+  "activity_level": activity_level,
+  'food_preference' : food_preference,
+  "occupation" : occupation,
+    }
+    db_patient_details = models.PatientDetails(**patient_details_data)
     database.add(db_patient_details)
     database.commit()
     database.refresh(db_patient_details)
-    Merge(patient_dict, patient_details_dict)
+    Merge(patientdata, patient_details_data)
     token = {
         'authentication_token' : JWTUtility.encode_token(db_patient.email,db_patient.contact_number)
     }
     print("tokendsddcd")
-    print(token['authentication_token'])
-    Merge(token, patient_details_dict)
-    return ResponseData.success(patient_details_dict,"Patient added successfully")
+    Merge(token, patient_details_data)
+    if patient_details_data["hospital_id"] is None:
+        patient_details_data["hospital_id"] = ""
+    return ResponseData.success(patient_details_data,"New Patient added successfully")
 
 def get_patient(request:Request,database: Session, contact_number : str):
     """Function to tell user if patient with given contact number already exists or not"""
@@ -67,6 +95,8 @@ def get_patient_by_id(database: Session, id : Optional[int] = None):
         return ResponseData.success([],"Patient with this id does not exists")
     db_patient_details = database.query(models.PatientDetails).filter(models.PatientDetails.id == id).first()
     Merge(db_patient.__dict__, db_patient_details.__dict__)
+    if db_patient_details.__dict__["hospital_id"] is None:
+        db_patient_details.__dict__["hospital_id"] = ""
     return ResponseData.success(db_patient_details.__dict__,"Patient details fetched successfully")
 
 def get_patient_by_pagination(database: Session,page : int,size:int):
@@ -103,86 +133,83 @@ def check_if_patient_id_is_valid(database: Session, id : Optional[int] = None):
     else:
         return False
 
-def update_patient_details(database: Session, patient: schemas.AddNewPatient):
-    """Function to return query based data while creating add_new_staff creation api"""
-    data = database.query(models.PatientDetails,models.Patient).filter(models.Patient.id == patient.id).all()
-    dict1 = data[0]["PatientDetails"]
-    dict2 = data[0]["Patient"]
-    if patient.dict()["first_name"] is not None :
-        dict2.__dict__["first_name"] = patient.dict()["first_name"]
-    if patient.dict()["last_name"] is not None :
-        dict2.__dict__["last_name"] = patient.dict()["last_name"]
-    if patient.dict()["contact_number"] is not None :
-        dict2.__dict__["contact_number"] = patient.dict()["contact_number"]
-    if patient.dict()["profile_pic"] is not None :
-        dict2.__dict__["profile_pic"] = patient.dict()["profile_pic"]
-    if patient.dict()["email"] is not None :
-        dict2.__dict__["email"] = patient.dict()["email"]
-    if patient.dict()["gender"] is not None :
-        dict2.__dict__["gender"] = patient.dict()["gender"]
-    if patient.dict()["date_of_birth"] is not None :
-        dict2.__dict__["date_of_birth"] = patient.dict()["date_of_birth"]
-    if patient.dict()["blood_group"] is not None :
-        dict2.__dict__["blood_group"] = patient.dict()["blood_group"]
-    if patient.dict()["hospital_id"] is not None :
-        dict2.__dict__["hospital_id"] = patient.dict()["hospital_id"]
-    if patient.dict()["marital_status"] is not None :
-        dict1.__dict__["marital_status"] = patient.dict()["marital_status"]
-    if patient.dict()["height"] is not None :
-        dict1.__dict__["height"] = patient.dict()["height"]
-    if patient.dict()["weight"] is not None :
-        dict1.__dict__["weight"] = patient.dict()["weight"]
-    if patient.dict()["emergency_contact_number"] is not None :
-        dict1.__dict__["emergency_contact_number"] = patient.dict()["emergency_contact_number"]
-    if patient.dict()["city"] is not None :
-        dict1.__dict__["city"] = patient.dict()["city"]
-    if patient.dict()["allergies"] is not None :
-        dict1.__dict__["allergies"] = patient.dict()["allergies"]
-    if patient.dict()["current_medications"] is not None :
-        dict1.__dict__["current_medications"] = patient.dict()["current_medications"]
-    if patient.dict()["past_injuries"] is not None :
-        dict1.__dict__["past_injuries"] = patient.dict()["past_injuries"]
-    if patient.dict()["past_surgeries"] is not None :
-        dict1.__dict__["past_surgeries"] = patient.dict()["past_surgeries"]
-    if patient.dict()["smoking_habits"] is not None :
-        dict1.__dict__["smoking_habits"] = patient.dict()["smoking_habits"]
-    if patient.dict()["alchol_consumption"] is not None :
-        dict1.__dict__["alchol_consumption"] = patient.dict()["alchol_consumption"]
-    if patient.dict()["activity_level"] is not None :
-        dict1.__dict__["activity_level"] = patient.dict()["activity_level"]
-    if patient.dict()["food_preference"] is not None :
-        dict1.__dict__["food_preference"] = patient.dict()["food_preference"]
-    if patient.dict()["occupation"] is not None :
-        dict1.__dict__["occupation"] = patient.dict()["occupation"]
-    database.query(models.Patient).filter(models.Patient.id == patient.id).update({ models.Patient.id : patient.id,
-        models.Patient.first_name: dict2.__dict__["first_name"],
-        models.Patient.last_name : dict2.__dict__["last_name"],
-        models.Patient.contact_number : dict2.__dict__["contact_number"],
-        models.Patient.profile_pic : dict2.__dict__["profile_pic"],
-        models.Patient.email : dict2.__dict__["email"],
-        models.Patient.gender : dict2.__dict__["gender"],
-        models.Patient.date_of_birth : dict2.__dict__["date_of_birth"],
-        models.Patient.blood_group : dict2.__dict__["blood_group"],
-        models.Patient.hospital_id : dict2.__dict__["hospital_id"],
+def update_fields(actualDict,key,value):
+    if key != '' or key is not None:
+        actualDict[f"{key}"] = value
+
+def update_patient_details(database: Session, profile_pic: UploadFile, first_name: str, last_name: str, contact_number: str,
+                      email: str, gender: str,
+                      date_of_birth: str, blood_group: str,
+                      hospital_id: str,marital_status: str, height: str, weight: str,
+                      emergency_contact_number: str, city: str,
+                      allergies: str, current_medications: str,
+                      past_injuries: str,past_surgeries: str, smoking_habits: str, alchol_consumption: str,
+                      activity_level: str, food_preference: str,
+                      occupation: str,patient_id: Integer):
+    """Function to update patient details"""
+    db_patient = database.query(models.Patient).filter(models.Patient.id == patient_id).first()
+    if db_patient is None:
+        return ResponseData.success({},"Patient with this id does not exists")
+    dict2 = {
+        "first_name": first_name,
+  "last_name": last_name,
+  "contact_number": contact_number,
+  "email": email,
+  "gender": gender,
+  "date_of_birth": date_of_birth,
+  "blood_group": blood_group,
+  "hospital_id": hospital_id,
+  'profile_pic' : profile_pic
+    }
+    for key,value in dict2.items():
+        update_fields(dict2,key,value)
+    dict1 = {
+        "marital_status": marital_status,
+  "height": height,
+  "weight": weight,
+  "emergency_contact_number": emergency_contact_number,
+  "city": city,
+  "allergies": allergies,
+  "current_medications": current_medications,
+  "past_injuries": past_injuries,
+  'past_surgeries' : past_surgeries,
+  "smoking_habits" : smoking_habits,
+  "alchol_consumption": alchol_consumption,
+  "activity_level": activity_level,
+  'food_preference' : food_preference,
+  "occupation" : occupation
+    }
+    for key,value in dict1.items():
+        update_fields(dict1,key,value)
+    database.query(models.Patient).filter(models.Patient.id == patient_id).update({ models.Patient.id : patient_id,
+        models.Patient.first_name: dict2["first_name"],
+        models.Patient.last_name : dict2["last_name"],
+        models.Patient.contact_number : dict2["contact_number"],
+        models.Patient.profile_pic : dict2["profile_pic"],
+        models.Patient.email : dict2["email"],
+        models.Patient.gender : dict2["gender"],
+        models.Patient.date_of_birth : dict2["date_of_birth"],
+        models.Patient.blood_group : dict2["blood_group"],
+        # models.Patient.hospital_id : dict2["hospital_id"],
     })
-    database.query(models.PatientDetails).filter(models.PatientDetails.id == patient.id).update({
-        models.PatientDetails.id : patient.id,
-        models.PatientDetails.marital_status : dict1.__dict__["marital_status"],
-        models.PatientDetails.height : dict1.__dict__["height"],
-        models.PatientDetails.weight : dict1.__dict__["weight"],
-        models.PatientDetails.emergency_contact_number : dict1.__dict__["emergency_contact_number"],
-        models.PatientDetails.city : dict1.__dict__["city"],
-        models.PatientDetails.allergies : dict1.__dict__["allergies"],
-        models.PatientDetails.current_medications : dict1.__dict__["current_medications"],
-        models.PatientDetails.past_injuries : dict1.__dict__["past_injuries"],
-        models.PatientDetails.past_surgeries : dict1.__dict__["past_surgeries"],
-        models.PatientDetails.smoking_habits : dict1.__dict__["smoking_habits"],
-        models.PatientDetails.alchol_consumption : dict1.__dict__["alchol_consumption"],
-        models.PatientDetails.activity_level : dict1.__dict__["activity_level"],
-        models.PatientDetails.food_preference : dict1.__dict__["food_preference"],
-        models.PatientDetails.occupation : dict1.__dict__["occupation"],        
+    database.query(models.PatientDetails).filter(models.PatientDetails.id == patient_id).update({
+        models.PatientDetails.id : patient_id,
+        models.PatientDetails.marital_status : dict1["marital_status"],
+        models.PatientDetails.height : dict1["height"],
+        models.PatientDetails.weight : dict1["weight"],
+        models.PatientDetails.emergency_contact_number : dict1["emergency_contact_number"],
+        models.PatientDetails.city : dict1["city"],
+        models.PatientDetails.allergies : dict1["allergies"],
+        models.PatientDetails.current_medications : dict1["current_medications"],
+        models.PatientDetails.past_injuries : dict1["past_injuries"],
+        models.PatientDetails.past_surgeries : dict1["past_surgeries"],
+        models.PatientDetails.smoking_habits : dict1["smoking_habits"],
+        models.PatientDetails.alchol_consumption : dict1["alchol_consumption"],
+        models.PatientDetails.activity_level : dict1["activity_level"],
+        models.PatientDetails.food_preference : dict1["food_preference"],
+        models.PatientDetails.occupation : dict1["occupation"]        
     })
     database.flush()
     database.commit()
-    dict1.__dict__.update(dict2.__dict__)
-    return ResponseData.success(dict1.__dict__,"Patient details updated successfully")
+    dict1.update(dict2)
+    return ResponseData.success(dict1,"Patient Report details updated successfully")

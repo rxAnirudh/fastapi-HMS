@@ -3,7 +3,9 @@
 
 import re
 from typing import Optional
-from pydantic import BaseModel, EmailStr, validator
+from fastapi import File
+from pydantic import BaseModel, EmailStr, NonNegativeInt, validator
+from sqlalchemy import Integer
 
 
 class PatientBase(BaseModel):
@@ -11,7 +13,7 @@ class PatientBase(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     contact_number: Optional[str] = None
-    profile_pic: Optional[str] = None
+    profile_pic: Optional[bytes] = File(None)
     email: Optional[str] = None
     gender: Optional[str] = None
     date_of_birth: Optional[str] = None
@@ -30,7 +32,7 @@ class PatientBase(BaseModel):
     activity_level: Optional[str] = None
     food_preference: Optional[str] = None
     occupation: Optional[str] = None
-    hospital_id: Optional[str] = None
+    hospital_id: Optional[NonNegativeInt] = None
     
     @validator("contact_number")
     def phone_validation(cls, v):
@@ -41,13 +43,14 @@ class PatientBase(BaseModel):
         return v
     email: Optional[EmailStr] = None
     
+    
 class AddNewPatient(PatientBase):
     """Create class model for patient"""
     id : int
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     contact_number: Optional[str] = None
-    profile_pic: Optional[str] = None
+    profile_pic: Optional[bytes] = File(None)
     email: Optional[str] = None
     gender: Optional[str] = None
     date_of_birth: Optional[str] = None
@@ -66,7 +69,7 @@ class AddNewPatient(PatientBase):
     activity_level: Optional[str] = None
     food_preference: Optional[str] = None
     occupation: Optional[str] = None
-    hospital_id: Optional[str] = None
+    hospital_id: Optional[NonNegativeInt] = None
     # authentication_token: Optional[map] = None
 
 class AddPatientResponse(BaseModel):

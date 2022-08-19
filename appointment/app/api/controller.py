@@ -24,10 +24,15 @@ def Merge(dict1, dict2):
 def add_new_appointment(database: Session, appointment: schemas.AppointmentBase):
     """Function to return query based data while creating new appointment creation api"""
     Error.if_param_is_null_or_empty_or_not_valid(appointment.dict()["patient_id"],"patient Id",check_if_patient_id_is_valid(database,appointment.dict()["patient_id"]))
-    Error.if_param_is_null_or_empty_or_not_valid(appointment.dict()["hospital_id"],"Hospital Id",check_if_patient_id_is_valid(database,appointment.dict()["hospital_id"]))
+    Error.if_param_is_null_or_empty_or_not_valid(appointment.dict()["hospital_id"],"Hospital Id",check_if_hospital_id_is_valid(database,appointment.dict()["hospital_id"]))
     is_status_id_valid = database.query(models.AppointmentStatus).filter(models.AppointmentStatus.a_id == appointment.dict()["status_id"]).first()
     if not is_status_id_valid:
         raise HTTPException(status_code=400, detail="status id is invalid")
+    for key,value in appointment.dict().items():
+        if key == "start_time" or key == "end_time" or key == "booking_time":
+            is_error = Error.if_param_is_null_or_empty(appointment.dict()[key],key)
+            if is_error:
+                return ResponseData.success_without_data(f"{key} cannot be empty")
     db_appointment = models.Appointment(**appointment.__dict__)
     database.add(db_appointment)
     database.commit()
