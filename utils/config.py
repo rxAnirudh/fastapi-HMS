@@ -1,0 +1,1 @@
+IMAGE_DIR_PATH = "/Users/akash.kareliya/Documents/Python/fastAPI/ecommerce/files/images/"
