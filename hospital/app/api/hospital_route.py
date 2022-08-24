@@ -18,7 +18,6 @@ def create_hospital(hospital: schemas.HospitalBase, database: Session = Depends(
     #     raise HTTPException(status_code=400, detail="Hospital already registered with same contact number")
     return controller.create_hospital(database,hospital)
 
-
 @hospital_router.post("/get_hospital")
 def get_hospital(hospitalid: schemas.HospitalId, database: Session = Depends(get_db)):
     """Function to return hospital details

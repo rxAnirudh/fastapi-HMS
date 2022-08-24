@@ -4,7 +4,7 @@
 import re
 from typing import Optional
 from fastapi import File
-from pydantic import BaseModel, EmailStr, NonNegativeInt, validator
+from pydantic import BaseModel, EmailStr, NonNegativeInt, validator,SecretStr
 
 
 class PatientBase(BaseModel):
@@ -12,6 +12,7 @@ class PatientBase(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     contact_number: Optional[str] = None
+    password: Optional[str] = None
     profile_pic: Optional[bytes] = File(None)
     email: Optional[str] = None
     gender: Optional[str] = None
@@ -49,6 +50,7 @@ class AddNewPatient(PatientBase):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     contact_number: Optional[str] = None
+    password: Optional[str] = None
     profile_pic: Optional[bytes] = File(None)
     email: Optional[str] = None
     gender: Optional[str] = None
@@ -87,3 +89,36 @@ class GetPatientDetailsResponse(BaseModel):
 class PatientId(BaseModel):
     """Create class model for requesting id param in get patient api"""
     id : Optional[int] = None
+
+class PatientEmail(BaseModel):
+    """Create class model for requesting id param in get patient api"""
+    email : Optional[str] = None
+
+class PatientPassword(BaseModel):
+    """Create class model for requesting id param in get patient api"""
+    password : Optional[str] = None
+
+class AllergyId(BaseModel):
+    """Create class model for requesting id param in get patient allergies api"""
+    id : Optional[int] = None
+    allergy_name : Optional[str] = None
+
+class FoodPreferenceId(BaseModel):
+    """Create class model for requesting id param in get food preference api"""
+    id : Optional[int] = None
+    food_preference_name : Optional[str] = None
+
+class CurrentMedicationId(BaseModel):
+    """Create class model for requesting id param in get patient current medications api"""
+    id : Optional[int] = None
+    current_medication_name : Optional[str] = None
+
+class PastInjuries(BaseModel):
+    """Create class model for requesting id param in get patient past injuries api"""
+    id : Optional[int] = None
+    past_injury : Optional[str] = None
+
+class PastSurgeries(BaseModel):
+    """Create class model for requesting id param in get patient past surgeries api"""
+    id : Optional[int] = None
+    past_surgery : Optional[str] = None

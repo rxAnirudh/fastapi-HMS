@@ -12,7 +12,7 @@ class HospitalBase(BaseModel):
     address: Optional[str] = None
     city: Optional[str] = None
     pincode: Optional[str] = None
-    state: Optional[str] = None
+    state: Optional[str] = None 
     country: Optional[str] = None
     hospital_type: Optional[str] = None
     is_rented: Optional[str] = None

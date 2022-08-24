@@ -3,7 +3,7 @@
 from datetime import datetime
 from operator import index
 from fastapi import File
-from pydantic import FilePath
+from pydantic import SecretStr
 from sqlalchemy import Column, TIMESTAMP, Integer,  String
 from db import Base
 
@@ -15,6 +15,7 @@ class Patient(Base):
     first_name = Column(String, index=True)
     last_name = Column(String, index=True)
     contact_number = Column(String, index=True)
+    password = Column(String, index=True)
     profile_pic = Column(String, index=True)
     email = Column(String, index=True)
     gender = Column(String, index=True)
@@ -41,26 +42,28 @@ class PatientAllergies(Base):
     """Class for creating patient allergies model"""
     __tablename__ = 'patient_allergies'
     id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(String, index=True)
     allergy = Column(String, index=True)
 
 class PatientCurrentMedications(Base):
     """Class for creating patient current medications model"""
     __tablename__ = 'patient_current_medications'
     id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(String, index=True)
     current_medication = Column(String, index=True)
+
+class FoodPreference(Base):
+    """Class for creating food preference model"""
+    __tablename__ = 'food_preferences'
+    id = Column(Integer, primary_key=True, index=True)
+    food_preference = Column(String, index=True)
 
 class PatientPastInjuries(Base):
     """Class for creating patient past injuries model"""
     __tablename__ = 'patient_past_injuries'
     id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(String, index=True)
     past_injury = Column(String, index=True)
 
 class PatientPastSurgeries(Base):
     """Class for creating patient past surgeries model"""
     __tablename__ = 'patient_past_surgeries'
     id = Column(Integer, primary_key=True, index=True)
-    patient_id = Column(String, index=True)
     past_surgery = Column(String, index=True)
