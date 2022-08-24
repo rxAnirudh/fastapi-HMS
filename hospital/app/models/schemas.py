@@ -12,11 +12,13 @@ class HospitalBase(BaseModel):
     address: Optional[str] = None
     city: Optional[str] = None
     pincode: Optional[str] = None
-    state: Optional[str] = None
+    state: Optional[str] = None 
     country: Optional[str] = None
     hospital_type: Optional[str] = None
     is_rented: Optional[str] = None
     contact_number: Optional[str] = None
+
+
     @validator("contact_number")
     def phone_validation(cls, v):
         """Function for phone number validation"""
@@ -24,6 +26,7 @@ class HospitalBase(BaseModel):
         if v and not re.search(regex, v, re.I):
             raise ValueError("Phone Number is not valid.")
         return v
+
     email: Optional[EmailStr] = None
     
 class HospitalCreate(HospitalBase):

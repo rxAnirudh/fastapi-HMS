@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from response import Response as ResponseData
 from models import models,schemas
+from department.app.error_handling import Error
 
 
 def Merge(dict1, dict2):
@@ -14,6 +15,11 @@ def Merge(dict1, dict2):
 
 def add_new_department(database: Session, department: schemas.DepartmentBase):
     """Function to return query based data while new department creation api"""
+    for key,value in department.dict().items():
+        if key == "name":
+            is_error = Error.if_param_is_null_or_empty(department.dict()[key],key)
+            if is_error:
+                return ResponseData.success_without_data(f"{key} cannot be empty")
     db_department = models.Department(**department.__dict__)
     database.add(db_department)
     database.commit()

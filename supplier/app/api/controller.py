@@ -8,6 +8,7 @@ import sys
 from sqlalchemy.orm import Session
 from models import models,schemas
 from response import Response as ResponseData
+from supplier.app.error_handling import Error
 
 
 # Python code to merge dict using update() method
@@ -18,6 +19,11 @@ def Merge(dict1, dict2):
 
 def add_new_supplier(database: Session, supplier: schemas.SupplierBase):
     """Function to return query based data while creating new supplier creation api"""
+    for key,value in supplier.dict().items():
+        if key == "company" or key == "contact_number" or key == "address":
+            is_error = Error.if_param_is_null_or_empty(supplier.dict()[key],key)
+            if is_error:
+                return ResponseData.success_without_data(f"{key} cannot be empty")
     db_supplier = models.Supplier(**supplier.__dict__)
     database.add(db_supplier)
     database.commit()

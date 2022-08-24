@@ -10,14 +10,13 @@ hospital_router = APIRouter()
 
 app = FastAPI()
 
-@hospital_router.post("/create_hospital", response_model=schemas.CreateHospitalResponse)
+@hospital_router.post("/create_hospital")
 def create_hospital(hospital: schemas.HospitalBase, database: Session = Depends(get_db)):
     """Function to return final response while creating new_hospital creation api"""
-    db_hospital = controller.get_hospital(database, contact_number=hospital.contact_number)
-    if db_hospital:
-        raise HTTPException(status_code=400, detail="Hospital already registered with same contact number")
+    # db_hospital = controller.get_hospital(database, contact_number=hospital.contact_number)
+    # if db_hospital:
+    #     raise HTTPException(status_code=400, detail="Hospital already registered with same contact number")
     return controller.create_hospital(database,hospital)
-
 
 @hospital_router.post("/get_hospital")
 def get_hospital(hospitalid: schemas.HospitalId, database: Session = Depends(get_db)):

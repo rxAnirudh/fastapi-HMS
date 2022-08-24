@@ -1,6 +1,8 @@
 import sys
 
 from fastapi import HTTPException
+
+from medicine.app.error_handling import Error
 sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
 """Controller file for writing db queries"""
 from typing import Optional
@@ -18,6 +20,11 @@ def Merge(dict1, dict2):
 
 def add_new_medicine(database: Session, medicine: schemas.MedicineBase):
     """Function to return query based data while creating new medicine creation api"""
+    for key,value in medicine.dict().items():
+        if key == "name" or key == "cost" or key == "production_date":
+            is_error = Error.if_param_is_null_or_empty(medicine.dict()[key],key)
+            if is_error:
+                return ResponseData.success_without_data(f"{key} cannot be empty")
     medicine_dict = {'name': medicine.dict()["name"], 'type': medicine.dict()["type"],"cost" : medicine.dict()["cost"],
     "description" : medicine.dict()["description"]}
     db_medicine = models.Medicine(**medicine_dict)
