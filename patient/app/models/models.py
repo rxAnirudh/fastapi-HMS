@@ -5,7 +5,7 @@ from operator import index
 from fastapi import File
 from pydantic import SecretStr
 from sqlalchemy import Column, TIMESTAMP, Integer,  String
-from db import Base
+from patient.app.db import Base
 
 class Patient(Base):
     """Class for creating patient model"""
@@ -35,18 +35,53 @@ class PatientDetails(Base):
     smoking_habits = Column(String,index = True)
     alchol_consumption = Column(String,index = True)
     activity_level = Column(String,index = True)
-    food_preference = Column(String,index = True)
     occupation = Column(String,index = True)
 
-class PatientAllergies(Base):
+class Patient_Allergies(Base):
     """Class for creating patient allergies model"""
     __tablename__ = 'patient_allergies'
     id = Column(Integer, primary_key=True, index=True)
-    allergy = Column(String, index=True)
+    allergy_id = Column(String, index=True)
+    patient_id = Column(String, index=True)
+    
 
-class PatientCurrentMedications(Base):
+class Patient_CurrentMedications(Base):
     """Class for creating patient current medications model"""
     __tablename__ = 'patient_current_medications'
+    id = Column(Integer, primary_key=True, index=True)
+    current_medication_id = Column(String, index=True)
+    patient_id = Column(String, index=True)
+
+class Patient_FoodPreference(Base):
+    """Class for creating food preference model"""
+    __tablename__ = 'patient_food_preferences'
+    id = Column(Integer, primary_key=True, index=True)
+    food_preference_id = Column(String, index=True)
+    patient_id = Column(String, index=True)
+
+class Patient_PastInjuries(Base):
+    """Class for creating patient past injuries model"""
+    __tablename__ = 'patient_past_injuries'
+    id = Column(Integer, primary_key=True, index=True)
+    past_injury_id = Column(String, index=True)
+    patient_id = Column(String, index=True)
+
+class Patient_PastSurgeries(Base):
+    """Class for creating patient past surgeries model"""
+    __tablename__ = 'patient_past_surgeries'
+    id = Column(Integer, primary_key=True, index=True)
+    past_surgery_id = Column(String, index=True)
+    patient_id = Column(String, index=True)
+
+class Allergies(Base):
+    """Class for creating patient allergies model"""
+    __tablename__ = 'allergies'
+    id = Column(Integer, primary_key=True, index=True)
+    allergy = Column(String, index=True)
+
+class CurrentMedications(Base):
+    """Class for creating patient current medications model"""
+    __tablename__ = 'current_medications'
     id = Column(Integer, primary_key=True, index=True)
     current_medication = Column(String, index=True)
 
@@ -56,14 +91,14 @@ class FoodPreference(Base):
     id = Column(Integer, primary_key=True, index=True)
     food_preference = Column(String, index=True)
 
-class PatientPastInjuries(Base):
+class PastInjuries(Base):
     """Class for creating patient past injuries model"""
-    __tablename__ = 'patient_past_injuries'
+    __tablename__ = 'past_injuries'
     id = Column(Integer, primary_key=True, index=True)
     past_injury = Column(String, index=True)
 
-class PatientPastSurgeries(Base):
+class PastSurgeries(Base):
     """Class for creating patient past surgeries model"""
-    __tablename__ = 'patient_past_surgeries'
+    __tablename__ = 'past_surgeries'
     id = Column(Integer, primary_key=True, index=True)
     past_surgery = Column(String, index=True)

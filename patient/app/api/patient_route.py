@@ -8,11 +8,11 @@ sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-managem
 from fastapi import Depends, APIRouter, Form, HTTPException, Request, UploadFile,File
 from sqlalchemy.orm import Session
 from patient.app.models import schemas
-from db import get_db
+from patient.app.db import get_db
 
-from api import controller
+from patient.app.api import controller
 
-IMAGE_DIR_PATH = "/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/patient/patient_images"
+IMAGE_DIR_PATH = "patient/app/patient_images"
 
 patient_router = APIRouter()
 
@@ -50,10 +50,20 @@ async def add_patient(first_name: str = Form(), last_name: str = Form(),
                               allergy, current_medication, past_injury, 
                               past_surgery,smoking_habits,alchol_consumption,activity_level,food_preference,occupation)
 
+import asyncio
+
+@patient_router.post("/forget_password")
+def forgot_password(request: Request,email: schemas.PatientEmail,database: Session = Depends(get_db)):
+    """Function to send activation link on email id"""
+    return asyncio.run(controller.patient_forget_password(database, email = email.email))
+
+
+
 @patient_router.post("/patient_sign_in")
-def sign_in_patient(request: Request,email: str,password: str, database: Session = Depends(get_db)):
+async def sign_in_patient(request: Request, database: Session = Depends(get_db)):
     """Function to sign in patient"""
-    return controller.patient_sign_in_api(database, email = email,password = password)
+    request_json = await request.json()
+    return controller.patient_sign_in_api(database, email = request_json["email"],password = request_json["password"])
 
 @patient_router.post("/patient_reset_password")
 def patient_reset_password(request: Request,old_password,new_password, database: Session = Depends(get_db)):
@@ -66,7 +76,7 @@ def patient_reset_password(request: Request,old_password,new_password, database:
 def get_patient(request: Request,patientid: schemas.PatientId, database: Session = Depends(get_db)):
     """Function to return patient details
     (specific and all patient data can be fetched)"""
-    Authentication().authenticate(request.headers.get('Authorization'),database)
+    Authentication().authenticate(request.headers.get('Authorization'),database)[0].id
     return controller.get_patient_by_id(database, id = patientid.id)
 
 @patient_router.get("/get_allergies")
@@ -145,13 +155,13 @@ async def update_patient_report_details(request: Request,patient_id: str = Form(
                       hospital_id: str = Form(default=''),marital_status: str = Form(default=''), height: str = Form(default=''), 
                       weight: str = Form(default=''),
                       emergency_contact_number: str = Form(default=''), city: str = Form(default=""),
-                      allergy: list = Form(default=[]), current_medication: list = Form(default=[]),
-                      past_injury: list = Form(default=[]),past_surgery: list = Form(default=[]), smoking_habits: str = Form(default=''), 
+                      allergy: str = Form(default=''), current_medication: str = Form(default=''),
+                      past_injury: str = Form(default=''),past_surgery: str = Form(default=''), smoking_habits: str = Form(default=''), 
                       alchol_consumption: str = Form(default=''),
                       activity_level: str = Form(default=''), food_preference: str = Form(default=""),
                       occupation: str = Form(default=''),db: Session = Depends(get_db),):
     """Function to update particular patient details"""
-    # Authentication().authenticate(request.headers.get('Authorization'),db)
+    Authentication().authenticate(request.headers.get('Authorization'),db)
     filename = ""
     if profile_pic is not None:
         filename = profile_pic.filename
