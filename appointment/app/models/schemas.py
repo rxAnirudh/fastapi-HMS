@@ -2,17 +2,26 @@
 
 
 from typing import Optional
+from fastapi import File
 from pydantic import BaseModel
 
 
 class AppointmentBase(BaseModel):
     """Base class model for appointment"""
     patient_id: Optional[str] = None
+    doctor_id: Optional[str] = None
+    staff_id: Optional[str] = None
     hospital_id: Optional[str] = None
-    start_time: Optional[str] = None
-    end_time: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    mobile_number: Optional[str] = None
     status_id: Optional[str] = None
+    patient_profile_pic : Optional[bytes] = File(None)
+    disease : Optional[str] = None
     booking_time: Optional[str] = None
+    time_slot: Optional[str] = None
+    appointment_date: Optional[str] = None
+    file_data: Optional[bytes] = File(None)
 
 class AppointmentStatusBase(BaseModel):
     """Base class model for appointment"""
@@ -22,11 +31,19 @@ class AddNewAppointment(AppointmentBase):
     """Create class model for appointment"""
     id : int
     patient_id: Optional[str] = None
+    doctor_id: Optional[str] = None
+    staff_id: Optional[str] = None
     hospital_id: Optional[str] = None
-    start_time: Optional[str] = None
-    end_time: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    patient_profile_pic : Optional[bytes] = File(None)
+    disease : Optional[str] = None
+    mobile_number: Optional[str] = None
     status_id: Optional[str] = None
     booking_time: Optional[str] = None
+    time_slot: Optional[str] = None
+    appointment_date: Optional[str] = None
+    file_data: Optional[bytes] = File(None)
 
 class AddNewAppointmentStatus(AppointmentStatusBase):
     """Create class model for appointment status"""
