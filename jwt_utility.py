@@ -14,7 +14,7 @@ class JWTUtility:
     """
 
     JWT_TOKEN_EXPIRY = getattr(
-        settings, "JWT_TOKEN_EXPIRY", timedelta(seconds=10))
+        settings, "JWT_TOKEN_EXPIRY", timedelta(hours=10))
 
     @staticmethod
     def encode_token(email,number):
@@ -23,7 +23,7 @@ class JWTUtility:
         """
         if email:
             data = {
-                "exp": datetime.utcnow() + timedelta(days=settings.JWT_TOKEN_EXPIRY),
+                "exp": datetime.utcnow() + timedelta(days=7),
                 "email": email,
                 "mobile_number": number,
             }

@@ -4,7 +4,7 @@ from datetime import datetime
 from operator import index
 from pydantic import validator
 from sqlalchemy import Column, TIMESTAMP, Integer,  String
-from db import Base
+from hospital.app.db import Base
 
 
 class Hospital(Base):

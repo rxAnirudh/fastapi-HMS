@@ -8,7 +8,7 @@ from sqlalchemy.orm import sessionmaker
 import hospital.config
 
 DATABASE_URL = hospital.config.Config.DATABASE_URL
-engine = create_engine(url=DATABASE_URL)
+engine = create_engine(url='postgresql://anirudh.chawla:123@localhost/hospital')
 
 SessionLocal = sessionmaker(bind=engine,autocommit=False,autoflush=False)
 
