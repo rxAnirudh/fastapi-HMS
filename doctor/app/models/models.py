@@ -5,7 +5,7 @@ from operator import index
 from fastapi import File
 from pydantic import FilePath
 from sqlalchemy import Column, TIMESTAMP, Integer,  String
-from db import Base
+from doctor.app.db import Base
 
 class Doctor(Base):
     """Class for creating doctor model"""
@@ -29,8 +29,10 @@ class DoctorDetails(Base):
     next_available_at = Column(String,index=True)
     specialist_field = Column(String, index=True)
     education = Column(String, index=True)
+    about = Column(String, index=True)
     in_clinic_appointment_fees = Column(String, index=True)
     create_at = Column(String,index=True)
+    rating = Column(String,index=True)
 
 class PatientCommentDetails(Base):
     """Class for creating patient comment details model"""

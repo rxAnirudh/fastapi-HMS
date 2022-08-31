@@ -6,9 +6,9 @@ from sqlalchemy.orm import sessionmaker
 import doctor.config
 
 DATABASE_URL = doctor.config.Config.DATABASE_URL
-engine = create_engine(url=DATABASE_URL)
+doctor_engine = create_engine(url='postgresql://anirudh.chawla:123@localhost/doctor')
 
-SessionLocal = sessionmaker(bind=engine,autocommit=False,autoflush=False)
+SessionLocal = sessionmaker(bind=doctor_engine,autocommit=False,autoflush=False)
 
 Base = declarative_base()
 

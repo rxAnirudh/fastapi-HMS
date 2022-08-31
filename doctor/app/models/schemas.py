@@ -3,6 +3,7 @@
 
 import re
 from typing import Optional
+from fastapi import File
 from pydantic import BaseModel, EmailStr, validator
 
 
@@ -11,7 +12,7 @@ class DoctorBase(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     contact_number: Optional[str] = None
-    profile_pic: Optional[str] = None
+    profile_pic: Optional[bytes] = File(None)
     email: Optional[str] = None
     blood_group: Optional[str] = None
     gender: Optional[str] = None
@@ -20,8 +21,10 @@ class DoctorBase(BaseModel):
     next_available_at: Optional[str] = None
     specialist_field: Optional[str] = None
     education: Optional[str] = None
+    about: Optional[str] = None
     in_clinic_appointment_fees: Optional[str] = None
     create_at: Optional[str] = None
+    rating: Optional[str] = None
     # patients_comment: Optional[str] = None
     @validator("contact_number")
     def phone_validation(cls, v):
@@ -38,7 +41,7 @@ class AddNewDoctor(DoctorBase):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     contact_number: Optional[str] = None
-    profile_pic: Optional[str] = None
+    profile_pic: Optional[bytes] = File(None)
     email: Optional[str] = None
     blood_group: Optional[str] = None
     gender: Optional[str] = None
@@ -47,8 +50,10 @@ class AddNewDoctor(DoctorBase):
     next_available_at: Optional[str] = None
     specialist_field: Optional[str] = None
     education: Optional[str] = None
+    about: Optional[str] = None
     in_clinic_appointment_fees: Optional[str] = None
     create_at: Optional[str] = None
+    rating: Optional[str] = None
     # patients_comment: Optional[str] = None
 
 class AddDoctorResponse(BaseModel):
