@@ -93,6 +93,7 @@ class PatientId(BaseModel):
 class PatientEmail(BaseModel):
     """Create class model for requesting id param in get patient api"""
     email : Optional[str] = None
+    password : Optional[str] = None
 
 class PatientPassword(BaseModel):
     """Create class model for requesting id param in get patient api"""
