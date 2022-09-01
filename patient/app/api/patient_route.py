@@ -12,7 +12,7 @@ from patient.app.db import get_db
 
 from patient.app.api import controller
 
-IMAGE_DIR_PATH = "patient/app/patient_images"
+IMAGE_DIR_PATH = "/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/patient_images"
 
 patient_router = APIRouter()
 
@@ -56,8 +56,6 @@ import asyncio
 def forgot_password(request: Request,email: schemas.PatientEmail,database: Session = Depends(get_db)):
     """Function to send activation link on email id"""
     return asyncio.run(controller.patient_forget_password(database, email = email.email))
-
-
 
 @patient_router.post("/patient_sign_in")
 async def sign_in_patient(request: Request, database: Session = Depends(get_db)):

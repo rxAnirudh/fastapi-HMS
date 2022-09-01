@@ -4,6 +4,7 @@ from fastapi import Depends, APIRouter, File, Form, HTTPException, Request, Uplo
 from sqlalchemy.orm import Session
 from doctor.app.models import schemas
 from doctor.app.db import get_db
+from patient.app.db import get_db as get_patient_db
 from typing import List
 
 from doctor.app.api import controller
@@ -24,7 +25,7 @@ async def create_file(file=File(None)):
 async def add_doctor(
     first_name: str = Form(), last_name: str = Form(), 
                       contact_number: str = Form(),
-                      email: str = Form(),profile_pic: UploadFile = Form(default = File(None)),  gender: str = Form(),
+                      email: str = Form(),profile_pic: UploadFile = Form(default = None),  gender: str = Form(),
                       date_of_birth: str = Form(default=''), blood_group: str = Form(),
                       years_of_experience: str = Form(default=''),next_available_at: str = Form(default=''), specialist_field: str = Form(default=''), 
                       education: str = Form(default=''),about: str = Form(default=''),
@@ -43,10 +44,18 @@ async def add_doctor(
 
 
 @doctor_router.post("/get_doctor_details")
-def get_doctor(database: Session = Depends(get_db)):
+async def get_doctor(request: Request,database: Session = Depends(get_db),patientDatabase: Session = Depends(get_patient_db)):
     """Function to return doctor details
     (specific and all doctor data can be fetched)"""
-    return controller.get_doctor_by_id(database)
+    request_json = await request.json()
+    return controller.get_doctor_by_id(database,patientDatabase,request_json["specialist_field"])
+
+@doctor_router.post("/get_doctor_filter")
+async def get_doctor_filter(request: Request,database: Session = Depends(get_db),patientDatabase: Session = Depends(get_patient_db)):
+    """Function to return doctor details
+    (specific and all doctor data can be fetched)"""
+    request_json = await request.json()
+    return controller.get_doctor_by_filter(database,patientDatabase,request_json["specialist_field"])
 
 @doctor_router.get("/get_doctor_by_pagination")
 async def get_doctor_by_pagination(database: Session = Depends(get_db),page: int = 0, size: int = 5):
@@ -81,3 +90,10 @@ async def update_doctor_detail(request: Request,doctor_id: str = Form(),first_na
         await create_file(profile_pic)
     return controller.update_doctor_details(database,filename, first_name, last_name,
                               contact_number, email,gender,date_of_birth,blood_group,years_of_experience,next_available_at,specialist_field,education,about,in_clinic_appointment_fees,rating,doctor_id)
+
+@doctor_router.post("/add_doctor_feedback")
+async def add_doctor_feedback(request: Request,database: Session = Depends(get_db),patientDatabase: Session = Depends(get_patient_db)):
+    """Function to add doctor feedback"""
+    request_json = await request.json()
+    return controller.add_feeback_of_doctor(database,patientDatabase,comment = request_json["comment"],rating = request_json["rating"],patient_id = request_json["patient_id"],
+    staff_id = request_json["staff_id"],doctor_id = request_json["doctor_id"],hospital_id = request_json["hospital_id"],)

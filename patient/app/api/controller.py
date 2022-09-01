@@ -11,7 +11,7 @@ from authentication import Authentication
 from jwt_utility import JWTUtility
 import patient
 from patient.email_manager import EmailManager
-from response import Response as ResponseData
+from patient.app.response import Response as ResponseData
 from patient.app.models import models,schemas
 from hospital.app.api.controller import check_if_hospital_id_is_valid
 from patient.app.error_handling import Error
@@ -249,7 +249,6 @@ def get_patient_by_id(database: Session, id : Optional[int] = None):
     Merge(db_patient.__dict__, db_patient_details.__dict__)
     allergies_list = database.query(models.Patient_Allergies).filter(models.Patient_Allergies.patient_id == str(db_patient.id)).all()
     allergies = []
-    print(f"allergies_list[i] {allergies_list[0].allergy_id}")
     for i in range(0,len(allergies_list)):
         allergy = database.query(models.Allergies).filter(models.Allergies.id == str(allergies_list[i].allergy_id)).first()
         if allergy is not None:

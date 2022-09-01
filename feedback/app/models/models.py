@@ -8,10 +8,9 @@ class Feedback(Base):
     __tablename__ = 'feedback'
 
     id = Column(Integer, primary_key=True, index=True)
-    from_patient_id = Column(String, index=True)
-    to_staff_id = Column(String, index=True)
-    comment = Column(String, index=True)
-    rating = Column(String, index=True)
+    patient_id = Column(String, index=True)
+    staff_id = Column(String, index=True)
+    doctor_id = Column(String, index=True)
     created_on = Column(String, index=True)
     updated_on = Column(String, index=True)
     hospital_id = Column(String, index=True)

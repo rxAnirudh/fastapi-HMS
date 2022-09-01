@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from response import Response as ResponseData
+from hospital.app.response import Response as ResponseData
 
 
 class Error:

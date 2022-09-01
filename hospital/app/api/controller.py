@@ -5,7 +5,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from hospital.app.models.schemas import HospitalBase, HospitalCreate
 from hospital.app.models.models import Hospital,HospitalDetails
-from response import Response as ResponseData
+from hospital.app.response import Response as ResponseData
 from hospital.app.error_handling import Error
 
 # Python code to merge dict using update() method
