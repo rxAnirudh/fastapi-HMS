@@ -1,0 +1,24 @@
+name: fastapi_hms
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to ec2 on master branch PR
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout the files
+        uses: actions/checkout@v2
+
+      - name: Deploy to server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SOURCE: "./"
+          SSH_PRIVATE_KEY: ${{ secrets.AWS_EC2_PEM }}
+          REMOTE_USER: ${{ secrets.AWS_EC2_USERNAME }}
+          REMOTE_HOST: ${{ secrets.AWS_EC2_PUBLIC_IP }}
+          TARGET: "/home/ubuntu/fastapi_hms"
