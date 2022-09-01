@@ -14,6 +14,8 @@ from pathlib import Path
 
 SECRET_KEY = 'fastapi-insecure--_t)&hwjzixaj$$83hve-$ck0ab=#ohre4_5@$g7d=#39@egwo'
 
+
+
 # SECURITY WARNING: don't run with debug turned on in production!
 # JWT settings
 JWT_TOKEN_EXPIRY = 7   # No. of days

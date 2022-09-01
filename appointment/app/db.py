@@ -5,9 +5,9 @@ from sqlalchemy.orm import sessionmaker
 import appointment.config
 
 DATABASE_URL = appointment.config.Config.DATABASE_URL
-engine = create_engine(url=DATABASE_URL)
+appointment_engine = create_engine(url='postgresql://anirudh.chawla:123@localhost/appointment',)
 
-SessionLocal = sessionmaker(bind=engine,autocommit=False,autoflush=False)
+SessionLocal = sessionmaker(bind=appointment_engine,autocommit=False,autoflush=False)
 
 Base = declarative_base()
 

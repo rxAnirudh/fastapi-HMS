@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from jwt_utility import JWTUtility
 from sqlalchemy.orm import Session
 from patient.app.models import models
+from appointment.app.models import models as appointmentmodels
 from starlette.responses import Response
 
 
@@ -19,8 +20,11 @@ class Authentication():
         if is_valid:
             data = JWTUtility.decode_token(token)
             try:
+                print(f"user before {data}")
+                # user = database.query(appointmentmodels.Appointment).filter(models.Patient.email == data["email"],models.Patient.contact_number == data["mobile_number"]).first()
                 user = database.query(models.Patient).filter_by(
-                    email=data["email"], contact_number=data["mobile_number"]).first()
+                    email=data["email"] , contact_number = data["mobile_number"]).first()
+                print(f"user after {user}")
                 if not user:
                     raise HTTPException(status_code=400, detail="Invalid token")
             except Exception:
