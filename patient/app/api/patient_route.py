@@ -12,7 +12,7 @@ from patient.app.db import get_db
 
 from patient.app.api import controller
 
-IMAGE_DIR_PATH = f"{os.getcwd()}/patient_images"
+IMAGE_DIR_PATH = f"{os.getcwd()}/patient/app/patient_images"
 
 patient_router = APIRouter()
 

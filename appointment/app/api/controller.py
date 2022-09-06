@@ -46,8 +46,8 @@ def add_new_appointment(database: Session,patientDatabase: Session, first_name: 
   "staff_id": staff_id,
   "time_slot": time_slot,
   "appointment_date": appointment_date,
-  'file_data' : f'appointment_files/{file}' if file != "" else "",
-  'patient_profile_pic' : f'patient_profile_pic_files/{profile_pic}' if profile_pic != "" else "",
+  'file_data' : f'appointment/app/appointment_files/{file}' if file != "" else "",
+  'patient_profile_pic' : f'patient/app/patient_profile_pic_files/{profile_pic}' if profile_pic != "" else "",
   "disease": disease,
     }
     db_appointment = models.Appointment(**appointment_data)
@@ -141,8 +141,8 @@ def update_appointment_details(database: Session,get_doctor_database: Session, f
   "status_id": status_id if status_id != "" else db_appointment.status_id,
   "time_slot": time_slot if time_slot != "" else db_appointment.time_slot,
   "appointment_date": appointment_date if appointment_date != "" else db_appointment.appointment_date,
-  'file_data' : f"appointment_files/{file}" if file != "" else f"{db_appointment.file_data}",
-  'patient_profile_pic' : f"patient_profile_pic_files/{profile_pic}" if profile_pic != "" else f"{db_appointment.patient_profile_pic}",
+  'file_data' : f"appointment/app/appointment_files/{file}" if file != "" else f"{db_appointment.file_data}",
+  'patient_profile_pic' : f"patient/app/patient_profile_pic_files/{profile_pic}" if profile_pic != "" else f"{db_appointment.patient_profile_pic}",
     }
     for key,value in dict1.items():
         update_fields(dict1,key,value)

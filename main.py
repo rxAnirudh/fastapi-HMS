@@ -27,10 +27,10 @@ app.add_middleware(
 )
 
 def configure_static(app):  #new
-    app.mount("/appointment_files", StaticFiles(directory=f'{os.getcwd()}/appointment_files'), name="appointment_files")
-    app.mount("/patient_images", StaticFiles(directory=f'{os.getcwd()}/patient_images'), name="patient_images")
-    app.mount("/patient_profile_pic_files", StaticFiles(directory=f"{os.getcwd()}/patient_profile_pic_files"), name="patient_profile_pic_files")
-    app.mount("/doctor_images", StaticFiles(directory=f"{os.getcwd()}/doctor_images"), name="doctor_images")
+    app.mount("/appointment/app/appointment_files", StaticFiles(directory=f'{os.getcwd()}/appointment/app/appointment_files'), name="appointment_files")
+    app.mount("/patient/app/patient_images", StaticFiles(directory=f'{os.getcwd()}/patient/app/patient_images'), name="patient_images")
+    app.mount("/patient/app/patient_profile_pic_files", StaticFiles(directory=f"{os.getcwd()}/patient/app/patient_profile_pic_files"), name="patient_profile_pic_files")
+    app.mount("/doctor/app/doctor_images", StaticFiles(directory=f"{os.getcwd()}/doctor/app/doctor_images"), name="doctor_images")
 
 configure_static(app)
 

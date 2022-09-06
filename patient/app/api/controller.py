@@ -51,7 +51,7 @@ def add_new_patient(database: Session, file: UploadFile, first_name: str, last_n
   "date_of_birth": date_of_birth,
   "blood_group": blood_group,
   "hospital_id": hospital_id,
-  'profile_pic' : f'patient_images/{file}' if file != "" else "",
+  'profile_pic' : f'patient/app/patient_images/{file}' if file != "" else "",
     }
     db_patient = models.Patient(**patientdata)
     database.add(db_patient)
@@ -399,7 +399,7 @@ def update_patient_details(database: Session, profile_pic: UploadFile, first_nam
   "date_of_birth": date_of_birth if date_of_birth != "" else db_patient.date_of_birth,
   "blood_group": blood_group if blood_group != "" else db_patient.blood_group,
   "hospital_id": hospital_id if hospital_id != "" else db_patient.hospital_id,
-  'profile_pic' : f"patient_images/{profile_pic}" if profile_pic != "" else f"{db_patient.profile_pic}",
+  'profile_pic' : f"patient/app/patient_images/{profile_pic}" if profile_pic != "" else f"{db_patient.profile_pic}",
     }
     for key,value in dict2.items():
         update_fields(dict2,key,value)
