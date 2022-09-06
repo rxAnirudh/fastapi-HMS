@@ -4,8 +4,9 @@ from fastapi import UploadFile
 from sqlalchemy import Integer
 from sqlalchemy.orm import Session
 from doctor.app.error_handling import Error
-from response import Response as ResponseData
+from doctor.app.response import Response as ResponseData
 from doctor.app.models import models
+from patient.app.models import models as patientModels
 
 
 # Python code to merge dict using update() method
@@ -35,7 +36,7 @@ def add_new_doctor(database: Session,file: UploadFile, first_name: str, last_nam
         "first_name": first_name,
   "last_name": last_name,
   "contact_number": contact_number,
-  "profile_pic" : f'doctor_images/{file}',
+  "profile_pic" : f'doctor/app/doctor_images/{file}' if file != "" else "",
   "email": email,
   "gender": gender,
   "date_of_birth": date_of_birth,
@@ -54,7 +55,6 @@ def add_new_doctor(database: Session,file: UploadFile, first_name: str, last_nam
   "about": about,
   "in_clinic_appointment_fees": in_clinic_appointment_fees,
   "create_at" : "",
-  "rating" : rating
     }
     db_doctor_details = models.DoctorDetails(**doctor_details_data)
     database.add(db_doctor_details)
@@ -67,32 +67,71 @@ def get_doctor(database: Session, contact_number : str):
     """Function to tell user if doctor with given contact number already exists or not"""
     return database.query(models.Doctor).filter(models.Doctor.contact_number == contact_number).first()
 
-def get_doctor_by_id(database: Session):
+def get_doctor_by_id(database: Session,patientDatabase: Session,specialist_field):
     """Function to tell user if doctor with given contact number already exists or not"""
-    # if id is None:
-    #     data = database.query(models.DoctorDetails,models.Doctor).filter(models.Doctor.id == models.DoctorDetails.id).all()
-    #     list = []
-    #     if(len(data) > 1):
-    #      for i, ele in enumerate(data):
-    #         dict1 = ele["DoctorDetails"]
-    #         dict2 = ele["Doctor"]
-    #         dict1.__dict__.update(dict2.__dict__)
-    #         list.append(dict1)
-    #     return ResponseData.success(list,"Doctor details fetched successfully")
-    # db_doctor = database.query(models.Doctor).filter(models.Doctor.id == id).first()
-    # if db_doctor is None:
-    #     return ResponseData.success([],"Doctor with this id does not exists")
-    # db_doctor_details = database.query(models.DoctorDetails).filter(models.DoctorDetails.id == id).first()
-    # Merge(db_doctor.__dict__, db_doctor_details.__dict__)
-    # return ResponseData.success(db_doctor_details.__dict__,"Doctor details fetched successfully")
-    data = database.query(models.DoctorDetails,models.Doctor).filter(models.Doctor.id == models.DoctorDetails.id).all()
+    if specialist_field == "":
+        data = database.query(models.DoctorDetails,models.Doctor).filter(models.Doctor.id == models.DoctorDetails.id).all()
+    else:
+        data = database.query(models.DoctorDetails,models.Doctor).filter(models.Doctor.id == models.DoctorDetails.id,models.DoctorDetails.specialist_field == specialist_field).all()
     list = []
     if(len(data) > 0):
      for i, ele in enumerate(data):
         dict1 = ele["DoctorDetails"]
         dict2 = ele["Doctor"]
+        # dict3 = ele["PatientCommentDetails"]
         dict1.__dict__.update(dict2.__dict__)
+        # dict1.__dict__["Feedback"] = ele["PatientCommentDetails"]
         list.append(dict1)
+     for i, ele in enumerate(list):
+        feedback_data = database.query(models.PatientCommentDetails).filter(models.PatientCommentDetails.doctor_id == str(ele.__dict__["id"])).all()
+        if len(feedback_data) > 0:
+            for j, ele1 in enumerate(feedback_data):
+              print(f'ele1.__dict__["patient_id"] {ele1.__dict__["patient_id"]}')
+              db_patient = patientDatabase.query(patientModels.Patient).filter(patientModels.Patient.id == int(ele1.__dict__["patient_id"])).first()
+              print(f"db_patient {db_patient}")
+              if db_patient is not None:
+               ele1.__dict__["patient_id"] = db_patient.id
+               ele1.__dict__["patient_name"] = db_patient.first_name
+              feedback_data[j].__dict__.pop("doctor_id")
+              feedback_data[j].__dict__.pop("staff_id")
+              feedback_data[j].__dict__.pop("patient_id")
+              feedback_data[j].__dict__.pop("hospital_id")
+            ele.__dict__["feedbacks"] = feedback_data
+        else:
+            ele.__dict__["feedbacks"] = []
+    return ResponseData.success(list,"Doctor details fetched successfully")
+
+def get_doctor_by_filter(database: Session,patientDatabase: Session,specialist_field):
+    """Function to tell user if doctor with given contact number already exists or not"""
+    data = database.query(models.DoctorDetails,models.Doctor).filter(models.Doctor.id == models.DoctorDetails.id,models.DoctorDetails.specialist_field == specialist_field).all()
+    list = []
+    if(len(data) > 0):
+     for i, ele in enumerate(data):
+        dict1 = ele["DoctorDetails"]
+        dict2 = ele["Doctor"]
+        # dict3 = ele["PatientCommentDetails"]
+        dict1.__dict__.update(dict2.__dict__)
+        # dict1.__dict__["Feedback"] = ele["PatientCommentDetails"]
+        list.append(dict1)
+     for i, ele in enumerate(list):
+        feedback_data = database.query(models.PatientCommentDetails).filter(models.PatientCommentDetails.doctor_id == str(ele.__dict__["id"])).all()
+        if len(feedback_data) > 0:
+            for j, ele1 in enumerate(feedback_data):
+              print(f'ele1.__dict__["patient_id"] {ele1.__dict__["patient_id"]}')
+              db_patient = patientDatabase.query(patientModels.Patient).filter(patientModels.Patient.id == int(ele1.__dict__["patient_id"])).first()
+              print(f"db_patient {db_patient}")
+              if db_patient is not None:
+               ele1.__dict__["patient_id"] = db_patient.id
+               ele1.__dict__["patient_name"] = db_patient.first_name
+              feedback_data[j].__dict__.pop("doctor_id")
+              feedback_data[j].__dict__.pop("staff_id")
+              feedback_data[j].__dict__.pop("patient_id")
+              feedback_data[j].__dict__.pop("hospital_id")
+            ele.__dict__["feedbacks"] = feedback_data
+        else:
+            ele.__dict__["feedbacks"] = []
+    if len(list) == 0 : 
+        return ResponseData.success(list,"No doctor detail found")
     return ResponseData.success(list,"Doctor details fetched successfully")
 
 def delete_doctor_details(database: Session, id : Optional[int] = None):
@@ -104,6 +143,24 @@ def delete_doctor_details(database: Session, id : Optional[int] = None):
     database.query(models.Doctor).filter_by(id = id).delete()
     database.commit()
     return ResponseData.success([],"Doctor details deleted successfully")
+
+def add_feeback_of_doctor(database: Session,patientDatabase: Session, comment : Optional[str] = None,rating : Optional[str] = None,patient_id : Optional[str] = None, 
+staff_id : Optional[str] = None,doctor_id : Optional[str] = None,
+                     hospital_id : Optional[str] = None):
+    """Function to add doctor's feedback"""
+    feedback_data = {
+        "comment" : comment,
+        "rating" : rating,
+        "doctor_id": doctor_id,
+  "patient_id": patient_id,
+  "staff_id": staff_id,
+  "hospital_id": hospital_id,
+    }
+    db_feedback = models.PatientCommentDetails(**feedback_data)
+    database.add(db_feedback)
+    database.commit()
+    database.refresh(db_feedback)
+    return ResponseData.success(db_feedback.__dict__,'New feedback added successfully')
 
 def get_doctor_by_pagination(database: Session,page : int,size:int):
     """Function to get doctor details by pagination"""
@@ -138,7 +195,7 @@ def update_doctor_details(database: Session,file: UploadFile, first_name: str, l
         "first_name": first_name if first_name != "" else db_doctor.first_name,
   "last_name": last_name if last_name != "" else db_doctor.last_name,
   "contact_number": contact_number if contact_number != "" else db_doctor.contact_number,
-  'profile_pic' : f"patient_images/{file}" if file != "" else f"{db_doctor.profile_pic}",
+  'profile_pic' : f"patient/app/patient_images/{file}" if file != "" else f"{db_doctor.profile_pic}",
   "email": email if email != "" else db_doctor.email,
   "gender": gender if gender != "" else db_doctor.gender,
   "date_of_birth": date_of_birth if date_of_birth != "" else db_doctor.date_of_birth,
@@ -180,4 +237,4 @@ def update_doctor_details(database: Session,file: UploadFile, first_name: str, l
     })
     database.flush()
     database.commit()
-    return ResponseData.success({},"Doctor details updated successfully")
+    return ResponseData.success_without_data("Doctor details updated successfully")

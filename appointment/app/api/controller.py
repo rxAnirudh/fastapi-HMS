@@ -1,15 +1,17 @@
+import os
 import sys
 
 from fastapi import HTTPException, UploadFile
 from sqlalchemy import Integer
 
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+sys.path.append({os.getcwd()})
 """Controller file for writing db queries"""
 from typing import Optional
 import sys
 from sqlalchemy.orm import Session
 from appointment.app.models import models,schemas
 from doctor.app.models import models as doctorModels
+from patient.app.models import models as patientModels
 from appointment.app.response import Response as ResponseData
 from hospital.app.api.controller import check_if_hospital_id_is_valid
 from appointment.app.error_handling import Error
@@ -22,13 +24,16 @@ def Merge(dict1, dict2):
     """Function to merge dict using update method"""
     return dict2.update(dict1)
 
-def add_new_appointment(database: Session, first_name: str, last_name: str, mobile_number: str,booking_time: str,
+def add_new_appointment(database: Session,patientDatabase: Session, first_name: str, last_name: str, mobile_number: str,booking_time: str,
                       status_id: str, hospital_id: str,
                       patient_id: str, doctor_id: str,staff_id: str,file : UploadFile,profile_pic: UploadFile,time_slot: str,disease: str,appointment_date: str):
     """Function to add new appointment data"""
     # db_patient_number = database.query(models.Appointment).filter(models.Appointment.mobile_number == mobile_number).first()
     # if not db_patient_number:
     #     return ResponseData.success_without_data("Mobile number entered is not valid")
+    db_patient_id = patientDatabase.query(patientModels.Patient).filter(patientModels.Patient.id == int(patient_id)).first()
+    if not db_patient_id:
+        return ResponseData.success_without_data("Patient id is invalid")
     appointment_data = {
         "first_name": first_name,
   "last_name": last_name,
@@ -41,8 +46,8 @@ def add_new_appointment(database: Session, first_name: str, last_name: str, mobi
   "staff_id": staff_id,
   "time_slot": time_slot,
   "appointment_date": appointment_date,
-  'file_data' : f'appointment_files/{file}',
-  'patient_profile_pic' : f'patient_profile_pic_files/{profile_pic}',
+  'file_data' : f'appointment/app/appointment_files/{file}' if file != "" else "",
+  'patient_profile_pic' : f'patient/app/patient_profile_pic_files/{profile_pic}' if profile_pic != "" else "",
   "disease": disease,
     }
     db_appointment = models.Appointment(**appointment_data)
@@ -51,13 +56,38 @@ def add_new_appointment(database: Session, first_name: str, last_name: str, mobi
     database.refresh(db_appointment)
     return ResponseData.success(db_appointment.__dict__,"Appointment booked successfully")
 
-def get_appointment_by_id(database: Session,patient_id,get_doctor_database: Session):
+def get_appointment_by_id(database: Session,patientDatabase: Session,patient_id,date,get_doctor_database: Session):
     """Function to get appointment details based on appointment id generated while booking new appointment"""
-    db_appointment = database.query(models.Appointment).filter(models.Appointment.patient_id == patient_id).all()
-    if len(db_appointment) == 0:
-        return ResponseData.success([],"Appointment id is invalid")
+    print(f"patient_id {patient_id}")
+    db_patient_id = patientDatabase.query(patientModels.Patient).filter(patientModels.Patient.id == int(patient_id)).first()
+    if not db_patient_id:
+        return ResponseData.success_without_data("Patient id is invalid")
+    if date == "":
+       db_appointment = database.query(models.Appointment).filter(models.Appointment.patient_id == patient_id).all()
+    else:
+       db_appointment = database.query(models.Appointment).filter(models.Appointment.patient_id == patient_id,models.Appointment.appointment_date == date).all()
+    if len(db_appointment) == 0 and date == "":
+        return ResponseData.success([],"No appointment found for this patient")
+    if len(db_appointment) == 0 and date != "":
+        return ResponseData.success([],"No appointment found for this date")
     db_doctor = get_doctor_database.query(doctorModels.DoctorDetails,doctorModels.Doctor).filter(doctorModels.Doctor.id == db_appointment[0].doctor_id).first()
-    print(f"db_doctor {db_doctor['DoctorDetails']}")
+    if db_doctor is not None:
+       dict1 = db_doctor["DoctorDetails"]
+       dict2 = db_doctor["Doctor"]
+       dict1.__dict__.update(dict2.__dict__)
+       print(f"dict2.__dict__ {dict1.__dict__}")
+       for i in range(0,len(db_appointment)):
+        db_appointment[i].__dict__["doctor_data"] = dict1.__dict__
+        db_appointment[i].__dict__.pop("doctor_id")
+    #    Merge(db_doctor.__dict__,db_appointment.__dict__)
+    return ResponseData.success(db_appointment,"Appointment details fetched successfully")
+
+def get_appointment_by_date(database: Session,date,get_doctor_database: Session):
+    """Function to get appointment details based on appointment id generated while booking new appointment"""
+    db_appointment = database.query(models.Appointment).filter(models.Appointment.appointment_date == date).all()
+    if len(db_appointment) == 0:
+        return ResponseData.success([],"patient id is invalid")
+    db_doctor = get_doctor_database.query(doctorModels.DoctorDetails,doctorModels.Doctor).filter(doctorModels.Doctor.id == db_appointment[0].doctor_id).first()
     if db_doctor is not None:
        dict1 = db_doctor["DoctorDetails"]
        dict2 = db_doctor["Doctor"]
@@ -92,14 +122,13 @@ def delete_appointment_details(database: Session, id : Optional[int] = None):
 def update_fields(actualDict,key,value):
     if key != '' or key is not None:
         actualDict[f"{key}"] = value
-
-def update_appointment_details(database: Session, first_name: str, last_name: str, mobile_number: str,booking_time: str,
+def update_appointment_details(database: Session,get_doctor_database: Session, first_name: str, last_name: str, mobile_number: str,booking_time: str,
                       status_id: str, hospital_id: str,
-                      patient_id: str, doctor_id: str,staff_id: str,file : UploadFile, appointment_id: Integer,time_slot: str,appointment_date: str):
+                      patient_id: str, doctor_id: str,staff_id: str,file : UploadFile,profile_pic: UploadFile, appointment_id: Integer,time_slot: str,appointment_date: str):
     """Function to update appointment details"""
     db_appointment = database.query(models.Appointment).filter(models.Appointment.id == appointment_id).first()
     if db_appointment is None:
-        return ResponseData.success({},"Appointment with this id does not exists")
+        return ResponseData.success_without_data("Appointment with this id does not exists")
     dict1 = {
         "first_name": first_name if first_name != "" else db_appointment.first_name,
   "last_name": last_name if last_name != "" else db_appointment.last_name,
@@ -112,11 +141,12 @@ def update_appointment_details(database: Session, first_name: str, last_name: st
   "status_id": status_id if status_id != "" else db_appointment.status_id,
   "time_slot": time_slot if time_slot != "" else db_appointment.time_slot,
   "appointment_date": appointment_date if appointment_date != "" else db_appointment.appointment_date,
-  'file_data' : f"appointment_files/{file}" if file != "" else f"{db_appointment.file_data}",
+  'file_data' : f"appointment/app/appointment_files/{file}" if file != "" else f"{db_appointment.file_data}",
+  'patient_profile_pic' : f"patient/app/patient_profile_pic_files/{profile_pic}" if profile_pic != "" else f"{db_appointment.patient_profile_pic}",
     }
     for key,value in dict1.items():
         update_fields(dict1,key,value)
-    database.query(models.Appointment).filter(models.Appointment.id == appointment_id).update({ models.Appointment.id : appointment_id,
+    database.query(models.Appointment).filter(models.Appointment.id == appointment_id).update({models.Appointment.id : appointment_id,
         models.Appointment.first_name: dict1["first_name"],
         models.Appointment.last_name : dict1["last_name"],
         models.Appointment.mobile_number : dict1["mobile_number"],
@@ -129,10 +159,19 @@ def update_appointment_details(database: Session, first_name: str, last_name: st
         models.Appointment.time_slot : dict1["time_slot"],
         models.Appointment.appointment_date : dict1["appointment_date"],
         models.Appointment.file_data : dict1["file_data"],
+      models.Appointment.patient_profile_pic : dict1["patient_profile_pic"],  
     })
     database.flush()
     database.commit()
-    return ResponseData.success({},"Appointment details updated successfully")
+    db_appointment_updated = database.query(models.Appointment).filter(models.Appointment.id == appointment_id).first()
+    db_doctor = get_doctor_database.query(doctorModels.DoctorDetails,doctorModels.Doctor).filter(doctorModels.Doctor.id == db_appointment_updated.doctor_id).first()
+    if db_doctor is not None:
+       dict1 = db_doctor["DoctorDetails"]
+       dict2 = db_doctor["Doctor"]
+       dict1.__dict__.update(dict2.__dict__)
+       db_appointment_updated.__dict__["doctor_data"] = dict1.__dict__
+       db_appointment_updated.__dict__.pop("doctor_id")
+    return ResponseData.success(db_appointment_updated,"Appointment details updated successfully")
 
 
 def add_new_appointment_status(database: Session, appointment_status: schemas.AppointmentStatusBase):

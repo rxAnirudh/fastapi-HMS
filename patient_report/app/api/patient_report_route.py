@@ -11,7 +11,7 @@ from api import controller
 
 patient_report_router = APIRouter()
 
-IMAGE_DIR_PATH = "/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/patient_report/patient_report_images"
+IMAGE_DIR_PATH = f"{os.getcwd()}/patient_report/patient_report_images"
 
 async def create_file(file=File(None)):
     try:

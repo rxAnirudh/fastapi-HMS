@@ -1,8 +1,8 @@
-import sys
+import sys,os
 
 from fastapi import HTTPException
 from datetime import datetime
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+sys.path.append(os.getcwd())
 """Controller file for writing db queries"""
 from typing import Optional
 from sqlalchemy.orm import Session

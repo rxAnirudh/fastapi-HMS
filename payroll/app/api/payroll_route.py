@@ -1,7 +1,7 @@
 """File for patient route"""
 import os
 import sys
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+sys.path.append(os.getcwd())
 from fastapi import Depends, APIRouter, File, Form, UploadFile
 from sqlalchemy.orm import Session
 from payroll.app.models import schemas
@@ -11,7 +11,7 @@ from api import controller
 
 payroll_router = APIRouter()
 
-IMAGE_DIR_PATH = "/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/payroll/payroll_slips"
+IMAGE_DIR_PATH = f"{os.getcwd()}/payroll/payroll_slips"
 
 async def create_file(file=File(None)):
     try:

@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 import logging
 from multiprocessing import AuthenticationError
 import smtplib
-# from jinja2 import Environment
+from jinja2 import Environment
 from fastapi_mail import FastMail, MessageSchema,ConnectionConfig
 
 from email.message import EmailMessage
@@ -23,48 +23,44 @@ conf = ConnectionConfig(
     MAIL_SERVER = "smtp.gmail.com",
     MAIL_TLS = True,
     MAIL_SSL = False,
-    USE_CREDENTIALS = True,
+    USE_CREDENTIALS = False,
     VALIDATE_CERTS = True
 )
 
 class EmailManager:
     """Class for managing email"""
+    server = smtplib.SMTP(smtp_server,port)
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
 
+    def __init__(self) -> None:
+        try:
+            self.server.login(SENDER_EMAIL,password)
+        except Exception as e:
+            logging.debug(e)
         # my code
     async def forgot_password(self, recipient, subject,template):
         """Function for sending otp on email if user forgets password"""
         try:
-            message = MessageSchema(
-            subject="Fastapi-Mail module",
-            recipients=["anirudh.chawla@radixweb.com"],  # List of recipients, as many as you can pass 
-            subtype="html"
+           body = MIMEText(
+                Environment().from_string(template).render(
+                    title='Hello World!'
+                ), "html"
             )
-            print("called")
-            fm = FastMail(conf)
-            print("called1")
-            await fm.send_message(message)
-            print("called2")
-            return {
-                "message": "OTP has been sent successfully on your email address",
-                "status": True
-            } 
-            # body = MIMEText(
-            #     Environment().from_string(template).render(
-            #         title='Hello World!'
-            #     ), "html"
-            # )
-            message = MIMEMultipart("alternative")
-            message["Subject"] = subject
-            message["From"] = SENDER_EMAIL
-            message["To"] = recipient
-            # body = MIMEText(content,"html")
-            # message.attach(body)
-            self.server.sendmail(SENDER_EMAIL, recipient, message.as_string())
-            
-            return {
-                "message": "OTP has been sent successfully on your email address",
-                "status": True
-            }
+           message = MIMEMultipart("alternative")
+           message["Subject"] = subject
+           message["From"] = SENDER_EMAIL
+           message["To"] = recipient
+           # body = MIMEText(content,"html")
+           message.attach(body)
+        #    self.server.connect()
+           self.server.sendmail(SENDER_EMAIL, recipient, message.as_string())
+           print("calle2")
+           return {
+               "message": "OTP has been sent successfully on your email address",
+               "status": True
+           } 
         except Exception as exception:
             print(exception)
             return {

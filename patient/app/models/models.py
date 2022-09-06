@@ -43,8 +43,17 @@ class Patient_Allergies(Base):
     id = Column(Integer, primary_key=True, index=True)
     allergy_id = Column(String, index=True)
     patient_id = Column(String, index=True)
-    
 
+class Patient_Otp_For_Password(Base):
+    """Class for creating patient allergies model"""
+    __tablename__ = 'patient_otp_for_password'
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True)
+    otp = Column(String, index=True)
+    created_at = Column(String,index=True)
+    updated_at = Column(String,index=True)
+    
+    
 class Patient_CurrentMedications(Base):
     """Class for creating patient current medications model"""
     __tablename__ = 'patient_current_medications'

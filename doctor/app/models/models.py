@@ -32,13 +32,15 @@ class DoctorDetails(Base):
     about = Column(String, index=True)
     in_clinic_appointment_fees = Column(String, index=True)
     create_at = Column(String,index=True)
-    rating = Column(String,index=True)
 
 class PatientCommentDetails(Base):
     """Class for creating patient comment details model"""
     __tablename__ = 'patient_comment_details'
     id = Column(Integer, primary_key=True, index=True)
-    patients_comment = Column(String, index=True)
-    user_id = Column(Integer, index=True)
-    doctor_id = Column(Integer, index=True)
+    comment = Column(String, index=True)
+    rating = Column(String, index=True)
+    doctor_id = Column(String, index=True)
+    patient_id = Column(String, index=True)
+    staff_id = Column(String, index=True)
+    hospital_id = Column(String, index=True)
     

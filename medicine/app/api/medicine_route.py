@@ -1,6 +1,6 @@
 """File for patient route"""
-import sys
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+import sys,os
+sys.path.append(os.getcwd())
 from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
 from medicine.app.models import schemas

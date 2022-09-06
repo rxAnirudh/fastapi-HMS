@@ -1,9 +1,9 @@
 """Main file of our project"""
-import sys
+import sys,os
 from fastapi import FastAPI
 import uvicorn
 from db import Base,engine
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+sys.path.append(os.getcwd())
 from bill.app.api.bill_route import bill_router
 
 Base.metadata.create_all(engine)

@@ -1,6 +1,6 @@
 """Controller file for writing db queries"""
 from typing import List, Optional
-import sys
+import sys,os
 from sqlalchemy import Integer
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
@@ -8,7 +8,7 @@ from response import Response as ResponseData
 from models import models,schemas
 from hospital.app.api.controller import check_if_hospital_id_is_valid
 from patient.app.api.controller import check_if_patient_id_is_valid
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+sys.path.append(os.getcwd())
 
 
 

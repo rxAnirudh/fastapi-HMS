@@ -1,8 +1,9 @@
 """Controller file for writing db queries"""
+from datetime import datetime
 import json
 import math
 import random
-import sys
+import sys,os
 from fastapi import HTTPException,Request, UploadFile
 from typing import Optional
 from sqlalchemy import Integer
@@ -11,14 +12,14 @@ from authentication import Authentication
 from jwt_utility import JWTUtility
 import patient
 from patient.email_manager import EmailManager
-from response import Response as ResponseData
+from patient.app.response import Response as ResponseData
 from patient.app.models import models,schemas
 from hospital.app.api.controller import check_if_hospital_id_is_valid
 from patient.app.error_handling import Error
 import ast
 from fastapi.responses import FileResponse
 
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+sys.path.append(os.getcwd())
 
 
 # Python code to merge dict using update() method
@@ -50,7 +51,7 @@ def add_new_patient(database: Session, file: UploadFile, first_name: str, last_n
   "date_of_birth": date_of_birth,
   "blood_group": blood_group,
   "hospital_id": hospital_id,
-  'profile_pic' : f'patient_images/{file}'
+  'profile_pic' : f'patient/app/patient_images/{file}' if file != "" else "",
     }
     db_patient = models.Patient(**patientdata)
     database.add(db_patient)
@@ -148,11 +149,11 @@ def add_new_patient(database: Session, file: UploadFile, first_name: str, last_n
             if not database.query(models.PastSurgeries).filter(models.PastSurgeries.id == str(past_surgery.split(",")[i])).first():
                 return ResponseData.success_without_data("Past surgery id is invalid")
             new_list.append(database.query(models.PastSurgeries).filter(models.PastSurgeries.id == str(past_surgery.split(",")[i])).first())
-            past_surgery = {
+            past_surgery_data = {
                 "patient_id" : str(db_patient.id),
                 "past_surgery_id" : str(past_surgery.split(",")[i])
             }
-            db_patient_past_surgeries_details = models.Patient_PastSurgeries(**past_surgery)
+            db_patient_past_surgeries_details = models.Patient_PastSurgeries(**past_surgery_data)
             database.add(db_patient_past_surgeries_details)
             database.commit()
             database.refresh(db_patient_past_surgeries_details)
@@ -203,22 +204,56 @@ async def patient_forget_password(database: Session, email : Optional[str] = Non
                             "Forgot Password",
                             template
                         ),
-            # user_otp_data = OtpForPasswordModel.objects.filter(
-            #     user_id=user_data.id
-            # ).first()
-    return database.query(models.Patient).filter(models.Patient.email == email).first()
+    db_patient_otp = database.query(models.Patient_Otp_For_Password).filter(models.Patient_Otp_For_Password.user_id == db_patient_email.id).first()
+    if db_patient_otp:
+        print(models.Patient_Otp_For_Password.user_id == db_patient_email.id)
+        database.query(models.Patient_Otp_For_Password).filter(db_patient_otp.user_id == db_patient_email.id).update({ 
+        models.Patient_Otp_For_Password.user_id : db_patient_email.id,
+        models.Patient_Otp_For_Password.otp: OTP,
+        models.Patient_Otp_For_Password.updated_at: str(datetime.now()),
+    })
+        print(f"dsfOTP {OTP}")
+        database.flush()
+        database.commit()
+    else:
+        patient_data = {
+        "user_id" : db_patient_email.id,
+        "otp" : OTP,
+        "created_at" : str(datetime.now())
+    }
+        db_patient = models.Patient_Otp_For_Password(**patient_data)
+        database.add(db_patient)
+        database.commit()
+        database.refresh(db_patient)
+    return ResponseData.success_without_data("Otp has been successfully sent on your email address")
 
-def reset_password_for_patient(database: Session, old_password : str,new_password : str,patient_id:int):
+
+def reset_password_for_patient(database: Session, otp : str,new_password : str):
     """Function to reset password for a particular patient"""
-    db_patient = database.query(models.Patient).filter(models.Patient.id == patient_id,models.Patient.password == old_password).first()
-    if not db_patient:
-        return ResponseData.success_without_data("Password is invalid")
-    database.query(models.Patient).filter(models.Patient.id == patient_id).update({
+    patient_otp_data = database.query(models.Patient_Otp_For_Password).filter(models.Patient_Otp_For_Password.otp == otp).first()
+    if not patient_otp_data:
+        return ResponseData.success_without_data("Otp entered is invalid")
+    fmt = '%Y-%m-%d %H:%M:%S'
+    current_date = datetime.strptime(str(datetime.now()).split(".")[0],fmt)
+    print(f"patient_otp_data.updated_at {patient_otp_data.updated_at}")
+    if patient_otp_data.updated_at is not None:
+        otp_generated_date = datetime.strptime(str(patient_otp_data.updated_at).split(".")[0],fmt)
+    else:
+        otp_generated_date = datetime.strptime(str(patient_otp_data.created_at).split(".")[0],fmt)
+    diff = current_date - otp_generated_date
+    print(f"current_date {current_date}")
+    print(f"otp_generated_date {otp_generated_date}")
+    print(f"diff.seconds {diff.seconds}")
+    if diff.seconds > 60 : 
+        database.query(models.Patient_Otp_For_Password).filter(models.Patient_Otp_For_Password.user_id == patient_otp_data.user_id).delete()
+        database.commit()
+        return ResponseData.success_without_data("Entered otp is expired or is invalid")
+    database.query(models.Patient).filter(models.Patient.id == patient_otp_data.user_id).update({
         models.Patient.password : new_password,     
     })
     database.flush()
     database.commit()
-    return ResponseData.success({},"Password has been updated successfully")
+    return ResponseData.success_without_data("Password has been updated successfully")
 
 def patient_sign_in_api(database: Session,email : Optional[str] = None,password : Optional[str] = None):
     """Function to sign in a patient"""
@@ -238,10 +273,22 @@ def patient_sign_in_api(database: Session,email : Optional[str] = None,password 
 def get_patient_by_id(database: Session, id : Optional[int] = None):
     """Function to tell user if patient with given contact number already exists or not"""
     if id is None:
-        db_patient = database.query(models.Patient).filter().first()
-        db_patient_details = database.query(models.PatientDetails).filter().first()
-        Merge(db_patient.__dict__, db_patient_details.__dict__)
-        return ResponseData.success(db_patient_details.__dict__,"Patient details fetched successfully")
+        # db_patient = database.query(models.Patient).filter().first()
+        # db_patient_details = database.query(models.PatientDetails).filter().first()
+        data = database.query(models.Patient,models.PatientDetails).filter(models.Patient.id == models.PatientDetails.id).all()
+        list = []
+        if(len(data) > 0):
+         for i, ele in enumerate(data):
+            dict1 = ele["PatientDetails"]
+            dict2 = ele["Patient"]
+            # dict3 = ele["PatientCommentDetails"]
+            dict1.__dict__.update(dict2.__dict__)
+            dict1.__dict__["hospital_id"] = ""
+            # dict1.__dict__["Feedback"] = ele["PatientCommentDetails"]
+            list.append(dict1)
+            # Merge(db_patient.__dict__, db_patient_details.__dict__)
+         return ResponseData.success(list,"Patient details fetched successfully")
+        return ResponseData.success([],"No patient details found")
     db_patient = database.query(models.Patient).filter(models.Patient.id == id).first()
     if db_patient is None:
         return ResponseData.success([],"Patient with this id does not exists")
@@ -249,7 +296,6 @@ def get_patient_by_id(database: Session, id : Optional[int] = None):
     Merge(db_patient.__dict__, db_patient_details.__dict__)
     allergies_list = database.query(models.Patient_Allergies).filter(models.Patient_Allergies.patient_id == str(db_patient.id)).all()
     allergies = []
-    print(f"allergies_list[i] {allergies_list[0].allergy_id}")
     for i in range(0,len(allergies_list)):
         allergy = database.query(models.Allergies).filter(models.Allergies.id == str(allergies_list[i].allergy_id)).first()
         if allergy is not None:
@@ -342,7 +388,7 @@ def update_patient_details(database: Session, profile_pic: UploadFile, first_nam
     """Function to update patient details"""
     db_patient = database.query(models.Patient).filter(models.Patient.id == patient_id).first()
     if db_patient is None:
-        return ResponseData.success({},"Patient with this id does not exists")
+        return ResponseData.success_without_data("Patient with this id does not exists")
     print(f"first_name {db_patient.first_name}")
     dict2 = {
         "first_name": first_name if first_name != "" else db_patient.first_name,
@@ -353,7 +399,7 @@ def update_patient_details(database: Session, profile_pic: UploadFile, first_nam
   "date_of_birth": date_of_birth if date_of_birth != "" else db_patient.date_of_birth,
   "blood_group": blood_group if blood_group != "" else db_patient.blood_group,
   "hospital_id": hospital_id if hospital_id != "" else db_patient.hospital_id,
-  'profile_pic' : f"patient_images/{profile_pic}" if profile_pic != "" else f"{db_patient.profile_pic}",
+  'profile_pic' : f"patient/app/patient_images/{profile_pic}" if profile_pic != "" else f"{db_patient.profile_pic}",
     }
     for key,value in dict2.items():
         update_fields(dict2,key,value)
@@ -427,11 +473,11 @@ def update_patient_details(database: Session, profile_pic: UploadFile, first_nam
             # print(f"check_if_id_is_valid {check_if_id_is_valid}")
             # if check_if_id_is_valid is None:
             #     return ResponseData.success_without_data("Allergies id is invalid")
-            past_surgery = {
+            past_surgery_date = {
                 "patient_id" : str(db_patient.id),
                 "past_surgery_id" : str(past_surgery.split(",")[i])
             }
-            db_patient_past_surgeries_details = models.Patient_PastSurgeries(**past_surgery)
+            db_patient_past_surgeries_details = models.Patient_PastSurgeries(**past_surgery_date)
             database.add(db_patient_past_surgeries_details)
             database.commit()
             database.refresh(db_patient_past_surgeries_details)
@@ -487,7 +533,7 @@ def update_patient_details(database: Session, profile_pic: UploadFile, first_nam
     # dict1["patient_past_surgeries"] = surgeries_list
     # food_preference_list = database.query(models.Patient_FoodPreference).filter(models.Patient_FoodPreference.patient_id == str(db_patient.id)).all()
     # dict1["patient_food_preference"] = food_preference_list
-    return ResponseData.success({},"Patient details updated successfully")
+    return ResponseData.success_without_data("Patient details updated successfully")
 
 
 def get_allergies_by_id(database: Session):
