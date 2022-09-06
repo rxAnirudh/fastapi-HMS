@@ -7,7 +7,7 @@ import appointment.config
 DATABASE_URL = appointment.config.Config.DATABASE_URL
 appointment_engine = create_engine(url='postgresql://anirudh.chawla:123@localhost/appointment',)
 
-SessionLocal = sessionmaker(bind=appointment_engine,autocommit=False,autoflush=False)
+SessionLocal = sessionmaker(bind=appointment_engine,autocommit=False,autoflush=False,expire_on_commit=False)
 
 Base = declarative_base()
 

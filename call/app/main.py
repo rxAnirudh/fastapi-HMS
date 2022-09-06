@@ -1,5 +1,5 @@
-import sys
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+import sys,os
+sys.path.append(os.getcwd())
 import uvicorn
 from fastapi import FastAPI
 from db import Base,engine

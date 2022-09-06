@@ -10,7 +10,7 @@ from typing import List
 from doctor.app.api import controller
 
 doctor_router = APIRouter()
-IMAGE_DIR_PATH = "/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/doctor_images"
+IMAGE_DIR_PATH = f"{os.getcwd()}/doctor_images"
 
 async def create_file(file=File(None)):
     try:

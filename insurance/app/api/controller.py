@@ -1,12 +1,12 @@
 """Function for insurance schema"""
-import sys
+import sys,os
 from typing import Optional
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from response import Response as ResponseData
 from insurance.app.models import models,schemas
 from patient.app.api.controller import check_if_patient_id_is_valid
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+sys.path.append(os.getcwd())
 
 
 # Python code to merge dict using update() method

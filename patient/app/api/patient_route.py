@@ -4,7 +4,7 @@ import sys
 from urllib import request
 import json
 from authentication import Authentication
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+sys.path.append(os.getcwd())
 from fastapi import Depends, APIRouter, Form, HTTPException, Request, UploadFile,File
 from sqlalchemy.orm import Session
 from patient.app.models import schemas
@@ -12,7 +12,7 @@ from patient.app.db import get_db
 
 from patient.app.api import controller
 
-IMAGE_DIR_PATH = "/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/patient_images"
+IMAGE_DIR_PATH = f"{os.getcwd()}/patient_images"
 
 patient_router = APIRouter()
 
@@ -64,18 +64,20 @@ async def sign_in_patient(request: Request, database: Session = Depends(get_db))
     return controller.patient_sign_in_api(database, email = request_json["email"],password = request_json["password"])
 
 @patient_router.post("/patient_reset_password")
-def patient_reset_password(request: Request,old_password,new_password, database: Session = Depends(get_db)):
+async def patient_reset_password(request: Request, database: Session = Depends(get_db)):
     """Function to return patient details
     (specific and all patient data can be fetched)"""
-    patient_id = Authentication().authenticate(request.headers.get('Authorization'),database)[0].id
-    return controller.reset_password_for_patient(database,old_password=old_password,new_password=new_password,patient_id = patient_id)
+    request_json = await request.json()
+    return controller.reset_password_for_patient(database,otp=request_json["otp"],new_password=request_json["new_password"])
 
 @patient_router.post("/get_patient_details")
-def get_patient(request: Request,patientid: schemas.PatientId, database: Session = Depends(get_db)):
+def get_patient(request: Request, database: Session = Depends(get_db)):
     """Function to return patient details
     (specific and all patient data can be fetched)"""
-    Authentication().authenticate(request.headers.get('Authorization'),database)[0].id
-    return controller.get_patient_by_id(database, id = patientid.id)
+    patientid = None
+    if request.headers.get('Authorization') is not None:
+        patientid = Authentication().authenticate(request.headers.get('Authorization'),database)[0].id
+    return controller.get_patient_by_id(database, id = patientid)
 
 @patient_router.get("/get_allergies")
 def get_allergies(request: Request, database: Session = Depends(get_db)):

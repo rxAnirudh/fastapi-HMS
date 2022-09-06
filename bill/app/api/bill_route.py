@@ -3,7 +3,7 @@ import os
 import sys
 
 from authentication import Authentication
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+sys.path.append(os.getcwd())
 from fastapi import Depends, File, Form,  HTTPException, APIRouter,Request, UploadFile
 from sqlalchemy.orm import Session
 from bill.app.models import schemas
@@ -14,7 +14,7 @@ from datetime import datetime
 
 bill_router = APIRouter()
 
-IMAGE_DIR_PATH = "/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/bill/bill_images"
+IMAGE_DIR_PATH = f"{os.getcwd()}/bill/bill_images"
 
 async def create_file(file=File(None)):
     try:

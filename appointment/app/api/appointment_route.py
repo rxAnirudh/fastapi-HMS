@@ -12,10 +12,11 @@ from appointment.app.api import controller
 
 appointment_router = APIRouter()
 
-IMAGE_DIR_PATH = "/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/appointment_files"
-PROFILE_DIR_PATH = "/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi/patient_profile_pic_files"
+IMAGE_DIR_PATH = f"{os.getcwd()}/appointment_files"
+PROFILE_DIR_PATH = f"{os.getcwd()}/patient_profile_pic_files"
 
 async def create_file(file=File(None),filepath=str):
+    print(f"os. getcwd() {os.getcwd()}")
     try:
         contents = await file.read()
         path1 = os.path.join(filepath, file.filename)

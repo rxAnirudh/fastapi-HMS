@@ -1,6 +1,6 @@
 """Main file of our project"""
-import sys
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+import sys,os
+sys.path.append(os.getcwd())
 from fastapi import FastAPI
 import uvicorn
 from db import Base,doctor_engine

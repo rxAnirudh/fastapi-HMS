@@ -36,7 +36,7 @@ def add_new_doctor(database: Session,file: UploadFile, first_name: str, last_nam
         "first_name": first_name,
   "last_name": last_name,
   "contact_number": contact_number,
-  "profile_pic" : f'doctor_images/{file}',
+  "profile_pic" : f'doctor_images/{file}' if file != "" else "",
   "email": email,
   "gender": gender,
   "date_of_birth": date_of_birth,
@@ -237,4 +237,4 @@ def update_doctor_details(database: Session,file: UploadFile, first_name: str, l
     })
     database.flush()
     database.commit()
-    return ResponseData.success({},"Doctor details updated successfully")
+    return ResponseData.success_without_data("Doctor details updated successfully")

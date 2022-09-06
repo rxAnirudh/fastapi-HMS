@@ -1,9 +1,10 @@
+import os
 import sys
 
 from fastapi import HTTPException, UploadFile
 from sqlalchemy import Integer
 
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+sys.path.append({os.getcwd()})
 """Controller file for writing db queries"""
 from typing import Optional
 import sys
@@ -45,8 +46,8 @@ def add_new_appointment(database: Session,patientDatabase: Session, first_name: 
   "staff_id": staff_id,
   "time_slot": time_slot,
   "appointment_date": appointment_date,
-  'file_data' : f'appointment_files/{file}',
-  'patient_profile_pic' : f'patient_profile_pic_files/{profile_pic}',
+  'file_data' : f'appointment_files/{file}' if file != "" else "",
+  'patient_profile_pic' : f'patient_profile_pic_files/{profile_pic}' if profile_pic != "" else "",
   "disease": disease,
     }
     db_appointment = models.Appointment(**appointment_data)
@@ -57,6 +58,7 @@ def add_new_appointment(database: Session,patientDatabase: Session, first_name: 
 
 def get_appointment_by_id(database: Session,patientDatabase: Session,patient_id,date,get_doctor_database: Session):
     """Function to get appointment details based on appointment id generated while booking new appointment"""
+    print(f"patient_id {patient_id}")
     db_patient_id = patientDatabase.query(patientModels.Patient).filter(patientModels.Patient.id == int(patient_id)).first()
     if not db_patient_id:
         return ResponseData.success_without_data("Patient id is invalid")
@@ -126,7 +128,7 @@ def update_appointment_details(database: Session,get_doctor_database: Session, f
     """Function to update appointment details"""
     db_appointment = database.query(models.Appointment).filter(models.Appointment.id == appointment_id).first()
     if db_appointment is None:
-        return ResponseData.success({},"Appointment with this id does not exists")
+        return ResponseData.success_without_data("Appointment with this id does not exists")
     dict1 = {
         "first_name": first_name if first_name != "" else db_appointment.first_name,
   "last_name": last_name if last_name != "" else db_appointment.last_name,

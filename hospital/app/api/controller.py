@@ -1,6 +1,6 @@
 """Controller file for writing db queries"""
-import sys
-sys.path.append('/Users/anirudh.chawla/python_fast_api_projects/hospital-management-fastapi')
+import sys,os
+sys.path.append(os.getcwd())
 from typing import Optional
 from sqlalchemy.orm import Session
 from hospital.app.models.schemas import HospitalBase, HospitalCreate
