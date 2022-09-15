@@ -5,7 +5,7 @@ from operator import index
 from fastapi import File
 from pydantic import FilePath
 from sqlalchemy import Column, TIMESTAMP, Integer,  String
-from db import Base
+from staff.app.db import Base
 
 class Staff(Base):
     """Class for creating staff model"""

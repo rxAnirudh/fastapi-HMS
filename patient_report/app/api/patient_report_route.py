@@ -3,15 +3,15 @@ import os
 from fastapi import Depends, APIRouter, File, Form, Request, UploadFile
 from sqlalchemy.orm import Session
 from authentication import Authentication
-from models import schemas
-from db import get_db
+from patient_report.app.models import schemas
+from patient_report.app.db import get_db
 from datetime import datetime
 
-from api import controller
+from patient_report.app.api import controller
 
 patient_report_router = APIRouter()
 
-IMAGE_DIR_PATH = f"{os.getcwd()}/patient_report/patient_report_images"
+IMAGE_DIR_PATH = f"{os.getcwd()}/patient_report/app/patient_report_images"
 
 async def create_file(file=File(None)):
     try:

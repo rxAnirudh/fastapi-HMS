@@ -14,6 +14,7 @@ class DoctorBase(BaseModel):
     contact_number: Optional[str] = None
     profile_pic: Optional[bytes] = File(None)
     email: Optional[str] = None
+    password: Optional[str] = None
     blood_group: Optional[str] = None
     gender: Optional[str] = None
     date_of_birth: Optional[str] = None
@@ -47,6 +48,7 @@ class AddNewDoctor(DoctorBase):
     contact_number: Optional[str] = None
     profile_pic: Optional[bytes] = File(None)
     email: Optional[str] = None
+    password: Optional[str] = None
     blood_group: Optional[str] = None
     gender: Optional[str] = None
     date_of_birth: Optional[str] = None
@@ -96,3 +98,8 @@ class DoctorId(BaseModel):
 class PatientCommentId(BaseModel):
     """Create class model for requesting id param in get patient comment api"""
     id : Optional[int] = None
+
+class DoctorEmail(BaseModel):
+    """Create class model for requesting id param in get doctor api"""
+    email : Optional[str] = None
+    password : Optional[str] = None

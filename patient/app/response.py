@@ -23,6 +23,13 @@ class Response:
         return {"success": True, "message": message}
 
     @classmethod
+    def failure_without_data(cls, message):
+        """
+        Common success_without_data method for API response
+        """
+        return {"success": False, "message": message}
+
+    @classmethod
     def error(cls, error):
         """
         Common error method for API response

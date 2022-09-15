@@ -25,10 +25,10 @@ async def create_file(file=File(None)):
 async def add_doctor(
     first_name: str = Form(), last_name: str = Form(), 
                       contact_number: str = Form(),
-                      email: str = Form(),profile_pic: UploadFile = Form(default = None),  gender: str = Form(),
+                      email: str = Form(),password: str = Form(),profile_pic: UploadFile = Form(default = None),  gender: str = Form(),
                       date_of_birth: str = Form(default=''), blood_group: str = Form(),
                       years_of_experience: str = Form(default=''),next_available_at: str = Form(default=''), specialist_field: str = Form(default=''), 
-                      education: str = Form(default=''),about: str = Form(default=''),
+                      education: str = Form(default=''),about: str = Form(default=''),hospital_id: str = Form(default=''),
                       in_clinic_appointment_fees: str = Form(default=''),rating: str = Form(default=''),database: Session = Depends(get_db)):
     """Function to return final response while adding new doctor details"""
     filename = ""
@@ -40,7 +40,7 @@ async def add_doctor(
     # if db_doctor:
     #     raise HTTPException(status_code=400, detail="Doctor already registered with same contact number")
     return controller.add_new_doctor(database,filename, first_name, last_name,
-                              contact_number, email,gender,date_of_birth,blood_group,years_of_experience,next_available_at,specialist_field,education,about,in_clinic_appointment_fees,rating )
+                              contact_number, email,password,gender,date_of_birth,blood_group,years_of_experience,next_available_at,specialist_field,education,about,hospital_id,in_clinic_appointment_fees,rating )
 
 
 @doctor_router.post("/get_doctor_details")
@@ -48,7 +48,9 @@ async def get_doctor(request: Request,database: Session = Depends(get_db),patien
     """Function to return doctor details
     (specific and all doctor data can be fetched)"""
     request_json = await request.json()
-    return controller.get_doctor_by_id(database,patientDatabase,request_json["specialist_field"])
+    if 'specialist_field' not in request_json:
+        return controller.get_doctor_by_id(database,patientDatabase,"",request_json["id"])
+    return controller.get_doctor_by_id(database,patientDatabase,request_json["specialist_field"],"")
 
 @doctor_router.post("/get_doctor_filter")
 async def get_doctor_filter(request: Request,database: Session = Depends(get_db),patientDatabase: Session = Depends(get_patient_db)):
@@ -80,16 +82,16 @@ async def update_doctor_detail(request: Request,doctor_id: str = Form(),first_na
                       email: str = Form(default=''),profile_pic: UploadFile = File(None),  gender: str = Form(default=''),
                       date_of_birth: str = Form(default=''), blood_group: str = Form(default=''),
                       years_of_experience: str = Form(default=''),next_available_at: str = Form(default=''), specialist_field: str = Form(default=''), 
-                      education: str = Form(default=''),about: str = Form(default=''),
-                      in_clinic_appointment_fees: str = Form(default=''),rating: str = Form(default=''),database: Session = Depends(get_db)):
+                      education: str = Form(default=''),about: str = Form(default=''),hospital_id: str = Form(default=''),
+                      in_clinic_appointment_fees: str = Form(default=''),rating: str = Form(default=''),database: Session = Depends(get_db),patientDatabase: Session = Depends(get_patient_db)):
     """Function to update particular doctor details"""
     # Authentication().authenticate(request.headers.get('Authorization'),db)
     filename = ""
     if profile_pic is not None:
         filename = profile_pic.filename
         await create_file(profile_pic)
-    return controller.update_doctor_details(database,filename, first_name, last_name,
-                              contact_number, email,gender,date_of_birth,blood_group,years_of_experience,next_available_at,specialist_field,education,about,in_clinic_appointment_fees,rating,doctor_id)
+    return controller.update_doctor_details(database,patientDatabase,filename, first_name, last_name,
+                              contact_number, email,gender,date_of_birth,blood_group,years_of_experience,next_available_at,specialist_field,education,about,hospital_id,in_clinic_appointment_fees,rating,doctor_id)
 
 @doctor_router.post("/add_doctor_feedback")
 async def add_doctor_feedback(request: Request,database: Session = Depends(get_db),patientDatabase: Session = Depends(get_patient_db)):
@@ -97,3 +99,24 @@ async def add_doctor_feedback(request: Request,database: Session = Depends(get_d
     request_json = await request.json()
     return controller.add_feeback_of_doctor(database,patientDatabase,comment = request_json["comment"],rating = request_json["rating"],patient_id = request_json["patient_id"],
     staff_id = request_json["staff_id"],doctor_id = request_json["doctor_id"],hospital_id = request_json["hospital_id"],)
+
+
+import asyncio
+
+@doctor_router.post("/forget_password")
+def forgot_password(request: Request,email: schemas.DoctorEmail,database: Session = Depends(get_db)):
+    """Function to send activation link on email id"""
+    return asyncio.run(controller.doctor_forget_password(database, email = email.email))
+
+@doctor_router.post("/doctor_sign_in")
+async def sign_in_doctor(request: Request, database: Session = Depends(get_db)):
+    """Function to sign in patient"""
+    request_json = await request.json()
+    return controller.doctor_sign_in_api(database, email = request_json["email"],password = request_json["password"])
+
+@doctor_router.post("/doctor_reset_password")
+async def doctor_reset_password(request: Request, database: Session = Depends(get_db)):
+    """Function to return patient details
+    (specific and all patient data can be fetched)"""
+    request_json = await request.json()
+    return controller.reset_password_for_doctor(database,otp=request_json["otp"],new_password=request_json["new_password"])

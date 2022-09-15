@@ -7,7 +7,7 @@ sys.path.append(os.getcwd())
 from typing import Optional
 import sys
 from sqlalchemy.orm import Session
-from models import models,schemas
+from patient_report.app.models import models,schemas
 from response import Response as ResponseData
 from hospital.app.api.controller import check_if_hospital_id_is_valid
 from patient.app.api.controller import check_if_patient_id_is_valid

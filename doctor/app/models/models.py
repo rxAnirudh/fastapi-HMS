@@ -14,12 +14,14 @@ class Doctor(Base):
     id = Column(Integer, primary_key=True, index=True)
     first_name = Column(String, index=True)
     last_name = Column(String, index=True)
+    password = Column(String, index=True)
     contact_number = Column(String, index=True)
     profile_pic = Column(String, index=True)
     email = Column(String, index=True)
     gender = Column(String, index=True)
     date_of_birth = Column(String, index=True)
     blood_group = Column(String, index=True)
+    hospital_id = Column(String,index = True)
     
 class DoctorDetails(Base):
     """Class for creating doctor details model"""
@@ -44,3 +46,11 @@ class PatientCommentDetails(Base):
     staff_id = Column(String, index=True)
     hospital_id = Column(String, index=True)
     
+class Doctor_Otp_For_Password(Base):
+    """Class for creating doctor otp for password model"""
+    __tablename__ = 'doctor_otp_for_password'
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, index=True)
+    otp = Column(String, index=True)
+    created_at = Column(String,index=True)
+    updated_at = Column(String,index=True)

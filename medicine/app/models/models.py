@@ -3,7 +3,7 @@
 from operator import index
 from fastapi import File
 from sqlalchemy import Column, Integer,  String
-from db import Base
+from medicine.app.db import Base
 
 class Medicine(Base):
     """Class for creating medicine model"""

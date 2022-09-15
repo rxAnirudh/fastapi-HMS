@@ -13,7 +13,10 @@ from jwt_utility import JWTUtility
 import patient
 from patient.email_manager import EmailManager
 from patient.app.response import Response as ResponseData
-from patient.app.models import models,schemas
+from patient.app.models import models
+from appointment.app.models import models as appointmentModel
+from patient_report.app.models import models as patientReportModel
+from medicine.app.models import models as medicineModel
 from hospital.app.api.controller import check_if_hospital_id_is_valid
 from patient.app.error_handling import Error
 import ast
@@ -232,7 +235,7 @@ def reset_password_for_patient(database: Session, otp : str,new_password : str):
     """Function to reset password for a particular patient"""
     patient_otp_data = database.query(models.Patient_Otp_For_Password).filter(models.Patient_Otp_For_Password.otp == otp).first()
     if not patient_otp_data:
-        return ResponseData.success_without_data("Otp entered is invalid")
+        return ResponseData.failure_without_data("Otp entered is invalid")
     fmt = '%Y-%m-%d %H:%M:%S'
     current_date = datetime.strptime(str(datetime.now()).split(".")[0],fmt)
     print(f"patient_otp_data.updated_at {patient_otp_data.updated_at}")
@@ -259,7 +262,7 @@ def patient_sign_in_api(database: Session,email : Optional[str] = None,password 
     """Function to sign in a patient"""
     db_patient = database.query(models.Patient).filter(models.Patient.email == email,models.Patient.password == password).first()
     if not db_patient:
-        return ResponseData.success_without_data("Credentials are invalid")
+        return ResponseData.error("Credentials are invalid")
     db_patient_details = database.query(models.Patient).filter(models.Patient.email == email).first()
     token = {
         'authentication_token' : JWTUtility.encode_token(db_patient_details.email,db_patient_details.contact_number)
@@ -270,68 +273,109 @@ def patient_sign_in_api(database: Session,email : Optional[str] = None,password 
     db_patient_details.__dict__.pop("password")
     return ResponseData.success(db_patient_details.__dict__,"Patient signed in successfully")
 
-def get_patient_by_id(database: Session, id : Optional[int] = None):
+def get_patient_by_id(database: Session,appointment_database :Session,patient_report_database :Session,medicine_database :Session,doctor_id,search, id : Optional[int] = None):
     """Function to tell user if patient with given contact number already exists or not"""
-    if id is None:
-        # db_patient = database.query(models.Patient).filter().first()
-        # db_patient_details = database.query(models.PatientDetails).filter().first()
+    if id is None and doctor_id == "":
         data = database.query(models.Patient,models.PatientDetails).filter(models.Patient.id == models.PatientDetails.id).all()
         list = []
         if(len(data) > 0):
          for i, ele in enumerate(data):
             dict1 = ele["PatientDetails"]
             dict2 = ele["Patient"]
-            # dict3 = ele["PatientCommentDetails"]
             dict1.__dict__.update(dict2.__dict__)
             dict1.__dict__["hospital_id"] = ""
-            # dict1.__dict__["Feedback"] = ele["PatientCommentDetails"]
             list.append(dict1)
-            # Merge(db_patient.__dict__, db_patient_details.__dict__)
          return ResponseData.success(list,"Patient details fetched successfully")
         return ResponseData.success([],"No patient details found")
-    db_patient = database.query(models.Patient).filter(models.Patient.id == id).first()
-    if db_patient is None:
-        return ResponseData.success([],"Patient with this id does not exists")
-    db_patient_details = database.query(models.PatientDetails).filter(models.PatientDetails.id == id).first()
-    Merge(db_patient.__dict__, db_patient_details.__dict__)
-    allergies_list = database.query(models.Patient_Allergies).filter(models.Patient_Allergies.patient_id == str(db_patient.id)).all()
-    allergies = []
-    for i in range(0,len(allergies_list)):
-        allergy = database.query(models.Allergies).filter(models.Allergies.id == str(allergies_list[i].allergy_id)).first()
-        if allergy is not None:
-          allergies.append(allergy)
-    db_patient_details.__dict__["patient_allergies"] = allergies
-    medications_list = database.query(models.Patient_CurrentMedications).filter(models.Patient_CurrentMedications.patient_id == str(db_patient.id)).all()
-    medications = []
-    for i in range(0,len(medications_list)):
-        medication = database.query(models.CurrentMedications).filter(models.CurrentMedications.id == str(medications_list[i].current_medication_id)).first()
-        if medication is not None:
-          medications.append(medication)
-    db_patient_details.__dict__["patient_current_medications"] = medications
-    injuries_list = database.query(models.Patient_PastInjuries).filter(models.Patient_PastInjuries.patient_id == str(db_patient.id)).all()
-    injuries = []
-    for i in range(0,len(injuries_list)):
-        injury = database.query(models.PastInjuries).filter(models.PastInjuries.id == str(injuries_list[i].past_injury_id)).first()
-        if injury is not None:
-          injuries.append(injury)
-    db_patient_details.__dict__["patient_past_injuries"] = injuries
-    surgeries_list = database.query(models.Patient_PastSurgeries).filter(models.Patient_PastSurgeries.patient_id == str(db_patient.id)).all()
-    surgeries = []
-    for i in range(0,len(surgeries_list)):
-        surgery = database.query(models.PastSurgeries).filter(models.PastSurgeries.id == str(surgeries_list[i].past_surgery_id)).first()
-        if surgery is not None:
-          surgeries.append(surgery)
-    db_patient_details.__dict__["patient_past_surgeries"] = surgeries
-    food_preference_list = database.query(models.Patient_FoodPreference).filter(models.Patient_FoodPreference.patient_id == str(db_patient.id)).all()
-    food_preference = []
-    for i in range(0,len(food_preference_list)):
-        food = database.query(models.FoodPreference).filter(models.FoodPreference.id == str(food_preference_list[i].food_preference_id)).first()
-        if food is not None:
-          food_preference.append(food)
-    db_patient_details.__dict__["patient_food_preferences"] = food_preference
-    if db_patient_details.__dict__["hospital_id"] is None:
-        db_patient_details.__dict__["hospital_id"] = ""
-    return ResponseData.success(db_patient_details.__dict__,"Patient details fetched successfully")
+    if doctor_id != "":
+        appointment_data = appointment_database.query(appointmentModel.Appointment).filter(appointmentModel.Appointment.doctor_id == doctor_id).all()
+        completed_status = appointment_database.query(appointmentModel.AppointmentStatus).filter(appointmentModel.AppointmentStatus.status == 'Done').first()
+        completed_status_id = ''
+        if completed_status:
+            completed_status_id = completed_status.a_id
+        else:
+            return ResponseData.success([],"Appointment status Done does not exists in database")
+        finalPatientList = []
+        patientIds = []
+        if len(appointment_data) > 0:
+            for i in range(0,len(appointment_data)):
+                if appointment_data[i].__dict__["status_id"] == str(completed_status_id):
+                    if appointment_data[i].__dict__["patient_id"] not in patientIds:
+                        patientIds.append(appointment_data[i].__dict__["patient_id"])
+            print(f"patientIds {patientIds}")
+            for i in range(0,len(patientIds)):
+                db_patient = database.query(models.Patient).filter(models.Patient.id == patientIds[i]).all()
+                db_patient_report_data = patient_report_database.query(patientReportModel.PatientReport).filter(patientReportModel.PatientReport.patient_id == patientIds[i]).first()
+                db_patient_updated_report_medicine_details = patient_report_database.query(patientReportModel.PatientReportMedicineDetails).filter().all()
+                for j in range(0,len(db_patient_updated_report_medicine_details)):
+                    medicine_name = medicine_database.query(medicineModel.Medicine).filter((medicineModel.Medicine.id == int(db_patient_updated_report_medicine_details[j].__dict__["medicine_id"]))).first()
+                    if not medicine_name:
+                        return ResponseData.error("medicine id is invalid")
+                    db_patient_updated_report_medicine_details[j].__dict__["medicine_name"] = medicine_name.name
+                if len(db_patient) == 0:
+                    return ResponseData.success([],"No patient details found")  
+                for k in range(0,len(db_patient)):
+                    db_patient[k].__dict__["patient_report_data"] = db_patient_report_data.__dict__
+                    db_patient[k].__dict__["patient_report_data"]["medicine_details"] = db_patient_updated_report_medicine_details
+                    db_patient[k].__dict__["hospital_id"] = ''
+                    finalPatientList.append(db_patient[k].__dict__)
+            newList = []
+            if search != '':
+                    for k in range(0,len(finalPatientList)):
+                        if str(finalPatientList[k]['first_name']).lower().__contains__(str(search).lower()) or str(finalPatientList[k]['last_name']).lower().__contains__(str(search).lower()) or str(finalPatientList[k]['contact_number']).__contains__(search):
+                            newList.append(finalPatientList[k])
+            if len(newList) == 0 and search != '':
+                    return ResponseData.success([],"No patient details found")  
+            if search != '':
+                return ResponseData.success(newList,"Patient details fetched successfully")  
+            else:
+                return ResponseData.success(finalPatientList,"Patient details fetched successfully")  
+        else:
+            return ResponseData.success([],"No patient details found")  
+    else:
+         db_patient = database.query(models.Patient).filter(models.Patient.id == id).first()
+         if db_patient is None:
+             return ResponseData.success([],"Patient with this id does not exists")
+         db_patient_details = database.query(models.PatientDetails).filter(models.PatientDetails.id == id).first()
+         Merge(db_patient.__dict__, db_patient_details.__dict__)
+         allergies_list = database.query(models.Patient_Allergies).filter(models.Patient_Allergies.patient_id == str(db_patient.id)).all()
+         allergies = []
+         for i in range(0,len(allergies_list)):
+             allergy = database.query(models.Allergies).filter(models.Allergies.id == str(allergies_list[i].allergy_id)).first()
+             if allergy is not None:
+               allergies.append(allergy)
+         db_patient_details.__dict__["patient_allergies"] = allergies
+         medications_list = database.query(models.Patient_CurrentMedications).filter(models.Patient_CurrentMedications.patient_id == str(db_patient.id)).all()
+         medications = []
+         for i in range(0,len(medications_list)):
+             medication = database.query(models.CurrentMedications).filter(models.CurrentMedications.id == str(medications_list[i].current_medication_id)).first()
+             if medication is not None:
+               medications.append(medication)
+         db_patient_details.__dict__["patient_current_medications"] = medications
+         injuries_list = database.query(models.Patient_PastInjuries).filter(models.Patient_PastInjuries.patient_id == str(db_patient.id)).all()
+         injuries = []
+         for i in range(0,len(injuries_list)):
+             injury = database.query(models.PastInjuries).filter(models.PastInjuries.id == str(injuries_list[i].past_injury_id)).first()
+             if injury is not None:
+               injuries.append(injury)
+         db_patient_details.__dict__["patient_past_injuries"] = injuries
+         surgeries_list = database.query(models.Patient_PastSurgeries).filter(models.Patient_PastSurgeries.patient_id == str(db_patient.id)).all()
+         surgeries = []
+         for i in range(0,len(surgeries_list)):
+             surgery = database.query(models.PastSurgeries).filter(models.PastSurgeries.id == str(surgeries_list[i].past_surgery_id)).first()
+             if surgery is not None:
+               surgeries.append(surgery)
+         db_patient_details.__dict__["patient_past_surgeries"] = surgeries
+         food_preference_list = database.query(models.Patient_FoodPreference).filter(models.Patient_FoodPreference.patient_id == str(db_patient.id)).all()
+         food_preference = []
+         for i in range(0,len(food_preference_list)):
+             food = database.query(models.FoodPreference).filter(models.FoodPreference.id == str(food_preference_list[i].food_preference_id)).first()
+             if food is not None:
+               food_preference.append(food)
+         db_patient_details.__dict__["patient_food_preferences"] = food_preference
+         if db_patient_details.__dict__["hospital_id"] is None:
+             db_patient_details.__dict__["hospital_id"] = ""
+         return ResponseData.success(db_patient_details.__dict__,"Patient details fetched successfully")
 
 def get_patient_by_pagination(database: Session,page : int,size:int):
     """Function to get patient details by pagination"""

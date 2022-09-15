@@ -9,7 +9,9 @@ from fastapi import Depends, APIRouter, Form, HTTPException, Request, UploadFile
 from sqlalchemy.orm import Session
 from patient.app.models import schemas
 from patient.app.db import get_db
-
+from patient_report.app.db import get_db as patient_report_db
+from appointment.app.db import get_db as get_appointment_db
+from medicine.app.db import get_db as get_medicine_db
 from patient.app.api import controller
 
 IMAGE_DIR_PATH = f"{os.getcwd()}/patient/app/patient_images"
@@ -71,13 +73,21 @@ async def patient_reset_password(request: Request, database: Session = Depends(g
     return controller.reset_password_for_patient(database,otp=request_json["otp"],new_password=request_json["new_password"])
 
 @patient_router.post("/get_patient_details")
-def get_patient(request: Request, database: Session = Depends(get_db)):
+async def get_patient(request: Request, database: Session = Depends(get_db),appointment_database: Session = Depends(get_appointment_db),
+patient_report_database: Session = Depends(patient_report_db),medicine_database: Session = Depends(get_medicine_db)):
     """Function to return patient details
     (specific and all patient data can be fetched)"""
     patientid = None
-    if request.headers.get('Authorization') is not None:
+    request_json = await request.json()
+    if request.headers.get('Authorization') is not None and 'doctor_id' not in request_json:
         patientid = Authentication().authenticate(request.headers.get('Authorization'),database)[0].id
-    return controller.get_patient_by_id(database, id = patientid)
+    doctor_id = ''
+    search = ''
+    if 'doctor_id' in request_json:
+        doctor_id = request_json['doctor_id']
+    if 'search' in request_json:
+        search = request_json['search']
+    return controller.get_patient_by_id(database,appointment_database,patient_report_database,medicine_database,doctor_id,search, id = patientid)
 
 @patient_router.get("/get_allergies")
 def get_allergies(request: Request, database: Session = Depends(get_db)):
